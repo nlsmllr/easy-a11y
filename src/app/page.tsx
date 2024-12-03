@@ -4,7 +4,7 @@ export default function Home() {
       <main className="row-start-2 flex flex-col items-center justify-center gap-8">
         <p className="text-8xl font-black uppercase tracking-wide">Easy a11y</p>
       </main>
-      <footer className="row-start-3 flex flex-wrap items-center justify-center gap-6"></footer>
+      <footer></footer>
     </div>
   );
 }
