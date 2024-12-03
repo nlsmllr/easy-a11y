@@ -8,7 +8,7 @@ permissions:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true # for second commit
+  cancel-in-progress: true # for additional commits
 
 on:
   pull_request:
@@ -24,7 +24,7 @@ jobs:
         id: wait_for_deployment
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          environment: Preview – protofy-website-next # Name of the Vercel environment
+          environment: Preview – easy-a11y # Name of the Vercel environment
           max_timeout: 1200
       - name: Add comment to PR
         id: loading_comment_to_pr
@@ -42,16 +42,7 @@ jobs:
           LHCI_BUILD_CONTEXT__CURRENT_HASH: ${{ github.sha }}
         with:
           urls: |
-            ${{ steps.wait_for_deployment.outputs.url }}/de
-            ${{ steps.wait_for_deployment.outputs.url }}/de/projects
-            ${{ steps.wait_for_deployment.outputs.url }}/de/projects/tchibo
-            ${{ steps.wait_for_deployment.outputs.url }}/de/services
-            ${{ steps.wait_for_deployment.outputs.url }}/de/blog
-            ${{ steps.wait_for_deployment.outputs.url }}/de/blog/coden-wie-ein-maedchen
-            ${{ steps.wait_for_deployment.outputs.url }}/de/press
-            ${{ steps.wait_for_deployment.outputs.url }}/de/career
-            ${{ steps.wait_for_deployment.outputs.url }}/de/contact
-            ${{ steps.wait_for_deployment.outputs.url }}/de/contact/moritz-mann
+            "${{ steps.wait_for_deployment.outputs.url }}"
           runs: 3 # run 3 times for consistency
           uploadArtifacts: true
           temporaryPublicStorage: true
