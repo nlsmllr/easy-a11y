@@ -1,12 +1,35 @@
 name: Lighthouse
-on: [pull_request]
+
+on:
+  pull_request:
+    types: [opened, synchronize]
 
 jobs:
   lighthouse:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@master
-      - name: Lighthouse
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Run Lighthouse check
         uses: foo-software/lighthouse-check-action@master
+        id: lighthouse
         with:
           urls: 'https://www.nils-mueller.com/'
+          accessToken: ${{ secrets.FOO_SOFTWARE_API_KEY }}
+
+      - name: Post results to PR
+        uses: marocchino/sticky-pull-request-comment@v2.9.0
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          header: Lighthouse Results
+          message: |
+            ### Lighthouse Results
+            The Lighthouse check was completed for the following URL:
+            https://www.nils-mueller.com/
+
+            **Performance:** ${{ steps.lighthouse.outputs.performance }}
+            **Accessibility:** ${{ steps.lighthouse.outputs.accessibility }}
+            **Best Practices:** ${{ steps.lighthouse.outputs.bestPractices }}
+            **SEO:** ${{ steps.lighthouse.outputs.seo }}
+            **PWA:** ${{ steps.lighthouse.outputs.pwa }}
