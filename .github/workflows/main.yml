@@ -1,0 +1,19 @@
+name: Lighthouse CI
+
+on: push
+
+jobs:
+  lighthouse:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Audit URLs using Lighthouse
+        uses: treosh/lighthouse-ci-action@v10
+        with:
+          urls: |
+            https://easy-a11y.vercel.app/
+          budgetPath: ./budget.json # test performance budgets
+          uploadArtifacts: true # save results as an artifact
+          temporaryPublicStorage: true # upload performance report to the storage
