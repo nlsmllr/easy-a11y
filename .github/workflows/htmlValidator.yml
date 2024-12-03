@@ -1,0 +1,126 @@
+name: Vercel Preview HTML Validator Audit
+
+permissions:
+  pull-requests: write
+  checks: read
+  contents: read
+  deployments: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  pull_request:
+    types: [synchronize, opened]
+
+jobs:
+  generate_html_validator_audit:
+    timeout-minutes: 30
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wait for the Vercel deployment
+        uses: patrickedqvist/wait-for-vercel-preview@v1.3.1
+        id: wait_for_deployment
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          environment: Preview – protofy-website-next # Name of the Vercel environment
+          max_timeout: 1200
+
+      - name: Add comment to PR
+        id: loading_comment_to_pr
+        uses: marocchino/sticky-pull-request-comment@v2.9.0
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          number: ${{ github.event.pull_request.number }}
+          header: html-validator
+          message: |
+            Running HTML validation...
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          npm install -g html-validator-cli
+
+      - name: Validate HTML of preview build
+        id: html_validator
+        run: |
+          urls=(
+            "${{ steps.wait_for_deployment.outputs.url }}/de"
+            "${{ steps.wait_for_deployment.outputs.url }}/de/projects"
+            "${{ steps.wait_for_deployment.outputs.url }}/de/projects/tchibo"
+            "${{ steps.wait_for_deployment.outputs.url }}/de/services"
+            "${{ steps.wait_for_deployment.outputs.url }}/de/blog"
+            "${{ steps.wait_for_deployment.outputs.url }}/de/blog/coden-wie-ein-maedchen"
+            "${{ steps.wait_for_deployment.outputs.url }}/de/press"
+            "${{ steps.wait_for_deployment.outputs.url }}/de/career"
+            "${{ steps.wait_for_deployment.outputs.url }}/de/contact"
+            "${{ steps.wait_for_deployment.outputs.url }}/de/contact/moritz-mann"
+          )
+          
+          all_results=""
+          for url in "${urls[@]}"; do
+            echo "Validating $url"
+            result=$(html-validator --url="$url" --verbose --format=text 2>&1 || true)
+            if [[ "$result" == *"Error:"* || "$result" == *"Warning:"* ]]; then
+              filtered_result=$(echo "$result" | awk '/Trailing slash on void elements has no effect and interacts badly with unquoted attribute values./{found=1;next}/From line/{if(found){found=0;next}}{print}')
+              all_results+="$url:\n$filtered_result\n\n"
+            fi
+          done
+          
+          echo -e "$all_results" > validation_results.txt
+        shell: bash
+
+      - name: Format HTML validation results
+        id: format_html_validation_results
+        continue-on-error: true
+        uses: actions/github-script@v7.0.1
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          result-encoding: string
+          script: |
+            const fs = require('fs');
+            const results = fs.readFileSync('validation_results.txt', 'utf-8').split('\n\n');
+            const comment = ['⚡️ HTML Validation Report for the changes in this PR:', ' ']
+            results.forEach(result => {
+              if (result.trim() !== '') {
+                const [url, ...messages] = result.split('\n');
+                const cleanedUrl = url.trim().replace(/:$/, ''); // Remove trailing whitespace and colons
+                comment.push(
+                  `<details>`,
+                  `<summary>Results for ${cleanedUrl}</summary>`,
+                  '',
+                  '| Message |',
+                  '| --- |',
+                  ...messages.map(message => `| ${message.trim()} |`), // Remove leading or trailing whitespace from messages
+                  '',
+                  `</details>`,
+                  ' '
+                );
+              }
+            })
+            const output = comment.join('\n')
+            return output
+
+      - name: Report error to PR
+        id: report_error_to_pr
+        if: ${{ steps.format_html_validation_results.outcome != 'success' }}
+        uses: marocchino/sticky-pull-request-comment@v2.9.0
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          number: ${{ github.event.pull_request.number }}
+          header: html-validator
+          message: |
+            Error while running HTML validation:
+            ${{ steps.format_html_validation_results.outputs.result }}
+
+      - name: Add results to PR
+        id: results_to_pr
+        if: ${{ steps.format_html_validation_results.outcome == 'success' }}
+        uses: marocchino/sticky-pull-request-comment@v2.9.0
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          number: ${{ github.event.pull_request.number }}
+          header: html-validator
+          message: |
+            ${{ steps.format_html_validation_results.outputs.result }}
