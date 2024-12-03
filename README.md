@@ -1,7 +1,4 @@
-[![Build and Test](https://github.com/protofy/nextjs-template/actions/workflows/build.yml/badge.svg)](https://github.com/protofy/nextjs-template/actions/workflows/build.yml)
-
-This is the Protofy Next.js starter project. It can be used as a starting point for new web projects.  
-It includes the following features/tools:
+this repo includes the following features/tools:
 - [Next.js](https://nextjs.org/) with [TypeScript](https://www.typescriptlang.org/)
 - [Tailwind CSS](https://tailwindcss.com/) for styling
 - [ESLint](https://eslint.org/) with [Prettier](https://prettier.io/) for code style
@@ -12,6 +9,7 @@ It includes the following features/tools:
 - [Vercel CLI](https://vercel.com/docs/cli) for connecting to Vercel projects
 
 ## Table of Contents
+- [Table of Contents](#table-of-contents)
 - [Project structure](#project-structure)
 - [Setup](#setup)
 - [Environment variables](#environment-variables)
