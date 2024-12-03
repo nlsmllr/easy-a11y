@@ -9,4 +9,4 @@ jobs:
       - name: Lighthouse
         uses: foo-software/lighthouse-check-action@master
         with:
-          urls: 'https://www.nils-mueller.com/'
+          urls: 'https://a11y-tool-mzbyjwmu5-nlsmllrs-projects.vercel.app/'
