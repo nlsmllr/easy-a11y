@@ -2,8 +2,8 @@ import BundleAnalyzer from '@next/bundle-analyzer';
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  eslint: {
-    dirs: ['.'],
+  experimental: {
+    serverComponentsExternalPackages: ['lighthouse', 'chrome-launcher', 'pa11y'],
   },
 };
 

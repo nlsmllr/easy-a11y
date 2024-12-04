@@ -28,7 +28,11 @@
       "@/*": [
         "./src/*"
       ]
-    }
+    },
+    "typeRoots": [
+      "src/types",
+      "node_modules/@types"
+    ]
   },
   "include": [
     "next-env.d.ts",
@@ -41,7 +45,7 @@
     "vitest-setup.ts",
     "*.config.mjs",
     "*.config.js",
-    "*.config.ts",
+    "*.config.ts"
   ],
   "exclude": [
     "node_modules"
