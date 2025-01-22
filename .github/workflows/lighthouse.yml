@@ -17,7 +17,7 @@ on:
 jobs:
   generate_lighthouse_audit:
     timeout-minutes: 30
-    runs-on: ubuntu-latest-4cores-16gb
+    runs-on: ubuntu-latest
     steps:
       - name: Wait for the Vercel deployment
         uses: patrickedqvist/wait-for-vercel-preview@v1.3.1
