@@ -25,7 +25,7 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           environment: Preview – a11y-tool # Name of the Vercel environment
-          max_timeout: 1200
+          max_timeout: 1500
       - name: Add comment to PR
         id: loading_comment_to_pr
         uses: marocchino/sticky-pull-request-comment@v2.9.0
