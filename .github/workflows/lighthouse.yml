@@ -24,7 +24,7 @@ jobs:
         id: wait_for_deployment
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          environment: Preview – easy-a11y # Name of the Vercel environment
+          environment: Preview – a11y-tool # Name of the Vercel environment
           max_timeout: 1200
       - name: Add comment to PR
         id: loading_comment_to_pr
