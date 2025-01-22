@@ -37,7 +37,6 @@ jobs:
           header: lighthouse
           message: |
             Running Lighthouse audit...
-
       - name: Audit preview build with Lighthouse
         id: lighthouse_audit
         uses: treosh/lighthouse-ci-action@v11
