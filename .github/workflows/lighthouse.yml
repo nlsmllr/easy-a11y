@@ -19,6 +19,9 @@ jobs:
     timeout-minutes: 30
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
       - name: Wait for the Vercel deployment
         uses: patrickedqvist/wait-for-vercel-preview@v1.3.1
         id: wait_for_deployment
@@ -26,6 +29,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           environment: Preview # Ensure this matches exactly with Vercel's environment name
           max_timeout: 1200
+
       - name: Add comment to PR
         id: loading_comment_to_pr
         uses: marocchino/sticky-pull-request-comment@v2.9.0
@@ -35,6 +39,7 @@ jobs:
           header: lighthouse
           message: |
             Running Lighthouse audit...
+
       - name: Audit preview build with Lighthouse
         id: lighthouse_audit
         uses: treosh/lighthouse-ci-action@v11
@@ -46,17 +51,18 @@ jobs:
           runs: 3 # run 3 times for consistency
           uploadArtifacts: true
           temporaryPublicStorage: true
+
       - name: Format Lighthouse score
         id: format_lighthouse_score
         continue-on-error: true
         uses: actions/github-script@v7.0.1
         with:
-          github-token: ${{secrets.GITHUB_TOKEN}}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           result-encoding: string
           script: |
-            const results = ${{ steps.lighthouse_audit.outputs.manifest }}
+            const results = JSON.parse(`${{ steps.lighthouse_audit.outputs.manifest }}`)
             const representativeResults = results.filter(result => result.isRepresentativeRun)
-            const links = ${{ steps.lighthouse_audit.outputs.links }}
+            const links = JSON.parse(`${{ steps.lighthouse_audit.outputs.links }}`)
 
             const comment = ['⚡️ Lighthouse Report for the changes in this PR:', ' ']
 
@@ -82,8 +88,8 @@ jobs:
                 )
             }
 
-            const output = comment.join('\n')
-            return output
+            return comment.join('\n')
+
       - name: Report error to PR
         id: report_error_to_pr
         if: ${{ steps.format_lighthouse_score.outcome != 'success' }}
@@ -95,6 +101,7 @@ jobs:
           message: |
             Error while running Lighthouse audit:
             ${{ steps.format_lighthouse_score.outputs.result }}
+
       - name: Add results to PR
         id: results_to_pr
         if: ${{ steps.format_lighthouse_score.outcome == 'success' }}
