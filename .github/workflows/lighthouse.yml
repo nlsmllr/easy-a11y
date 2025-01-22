@@ -25,9 +25,10 @@ jobs:
         uses: patrickedqvist/wait-for-vercel-preview@v1.3.1
         id: wait_for_deployment
         with:
-          token: ${{ secrets.VERCEL_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
           environment: Preview # Ensure this matches exactly with Vercel's environment name
           max_timeout: 1200
+
       - name: Add comment to PR
         id: loading_comment_to_pr
         uses: marocchino/sticky-pull-request-comment@v2.9.0
@@ -37,6 +38,7 @@ jobs:
           header: lighthouse
           message: |
             Running Lighthouse audit...
+
       - name: Audit preview build with Lighthouse
         id: lighthouse_audit
         uses: treosh/lighthouse-ci-action@v11
