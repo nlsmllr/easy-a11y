@@ -24,7 +24,7 @@ jobs:
         id: wait_for_deployment
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          environment: Preview – protofy-website-next # Name of the Vercel environment
+          environment: Preview – easy-a11y # Name of the Vercel environment
           max_timeout: 1200
 
       - name: Add comment to PR
@@ -57,7 +57,7 @@ jobs:
             "${{ steps.wait_for_deployment.outputs.url }}/de/contact"
             "${{ steps.wait_for_deployment.outputs.url }}/de/contact/moritz-mann"
           )
-          
+
           all_results=""
           for url in "${urls[@]}"; do
             echo "Validating $url"
@@ -67,7 +67,7 @@ jobs:
               all_results+="$url:\n$filtered_result\n\n"
             fi
           done
-          
+
           echo -e "$all_results" > validation_results.txt
         shell: bash
 
