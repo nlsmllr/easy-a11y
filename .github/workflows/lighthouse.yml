@@ -42,7 +42,7 @@ jobs:
           LHCI_BUILD_CONTEXT__CURRENT_HASH: ${{ github.sha }}
         with:
           urls: |
-            ${{ steps.wait_for_deployment.outputs.url }}/
+            ${{ steps.wait_for_deployment.outputs.url }}
           runs: 3 # run 3 times for consistency
           uploadArtifacts: true
           temporaryPublicStorage: true
