@@ -25,7 +25,8 @@ jobs:
         uses: patrickedqvist/wait-for-vercel-preview@v1.3.1
         id: wait_for_deployment
         with:
-          # works after disabling the vercel deployment protection
+          # 401 Auth Error
+          # using VERCEL_TOKEN: 501 Bad Gateway Error
           token: ${{ secrets.GITHUB_TOKEN }}
           environment: Preview # Ensure this matches exactly with Vercel's environment name
           max_timeout: 1200
@@ -68,6 +69,7 @@ jobs:
 
             for (let i = 0; i < representativeResults.length; i++) {
                 const result = representativeResults[i].summary
+                const accessibilityDetails = representativeResults[i].audits?.['accessibility'] || 'No accessibility details available';
                 const formatResult = (res) => Math.round((res * 100))
                 Object.keys(result).forEach(key => result[key] = formatResult(result[key]))
                 
@@ -87,7 +89,7 @@ jobs:
                     ' ',
                     '**Accessibility Details:**',
                     '```',
-                    `${JSON.stringify(representativeResults[i].accessibility)}`,
+                    `${JSON.stringify(accessibilityDetails, null, 2)}`,
                     '```',
                     ' '
                 )
