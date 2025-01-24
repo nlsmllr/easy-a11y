@@ -25,8 +25,7 @@ jobs:
         uses: patrickedqvist/wait-for-vercel-preview@v1.3.1
         id: wait_for_deployment
         with:
-          # 401 Auth Error
-          # using VERCEL_TOKEN: 501 Bad Gateway Error
+          # works after disabling the vercel deployment protection
           token: ${{ secrets.GITHUB_TOKEN }}
           environment: Preview # Ensure this matches exactly with Vercel's environment name
           max_timeout: 1200
@@ -86,6 +85,11 @@ jobs:
                     ' ',
                     `*Detailed Report: [Lighthouse report](${Object.values(links)[i]})*`,
                     ' ',
+                    '**Accessibility Details:**',
+                    '```',
+                    `${JSON.stringify(representativeResults[i].accessibility)}`,
+                    '```',
+                    ' '
                 )
             }
 
