@@ -27,6 +27,7 @@ jobs:
         with:
           # 401 Auth Error
           # using VERCEL_TOKEN: 501 Bad Gateway Error
+          vercel_protection_bypass_header: '12345678901234567890123456789021'
           token: ${{ secrets.GITHUB_TOKEN }}
           environment: Preview # Ensure this matches exactly with Vercel's environment name
           max_timeout: 1200
