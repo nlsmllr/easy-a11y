@@ -69,7 +69,12 @@ jobs:
 
             for (let i = 0; i < representativeResults.length; i++) {
                 const result = representativeResults[i].summary
-                const accessibilityDetails = representativeResults[i].audits?.['accessibility'] || 'No accessibility details available';
+                const audits = representativeResults[i].audits || {}
+                const accessibilityDetails = Object.keys(audits).filter(key => audits[key].score !== 1).map(key => {
+                    const audit = audits[key]
+                    return `**${audit.title}**: ${audit.description}\nFailing Elements: \n${audit.details?.items?.map(item => JSON.stringify(item.node?.snippet || 'No element data')).join('\n') || 'No failing elements listed.'}`
+                }).join('\n\n') || 'All checks passed!';
+
                 const formatResult = (res) => Math.round((res * 100))
                 Object.keys(result).forEach(key => result[key] = formatResult(result[key]))
                 
@@ -89,7 +94,7 @@ jobs:
                     ' ',
                     '**Accessibility Details:**',
                     '```',
-                    `${JSON.stringify(accessibilityDetails, null, 2)}`,
+                    `${accessibilityDetails}`,
                     '```',
                     ' '
                 )
