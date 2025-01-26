@@ -79,6 +79,9 @@ jobs:
             ACCESSIBILITY_COLOR=$(if [ $ACCESSIBILITY_SCORE -ge 90 ]; then echo "🟢"; elif [ $ACCESSIBILITY_SCORE -ge 50 ]; then echo "🟠"; else echo "🔴"; fi)
             BEST_PRACTICES_COLOR=$(if [ $BEST_PRACTICES_SCORE -ge 90 ]; then echo "🟢"; elif [ $BEST_PRACTICES_SCORE -ge 50 ]; then echo "🟠"; else echo "🔴"; fi)
             SEO_COLOR=$(if [ $SEO_SCORE -ge 90 ]; then echo "🟢"; elif [ $SEO_SCORE -ge 50 ]; then echo "🟠"; else echo "🔴"; fi)
+
+            # Extract report link
+            REPORT_LINK=$(echo "$REPORT_CONTENT" | jq -r '.finalUrl')
           else
             FAILING_AUDITS="Lighthouse report not found."
             PERFORMANCE_SCORE="N/A"
@@ -89,6 +92,7 @@ jobs:
             ACCESSIBILITY_COLOR="🔴"
             BEST_PRACTICES_COLOR="🔴"
             SEO_COLOR="🔴"
+            REPORT_LINK="#"
           fi
 
           # Save the output to a GitHub Actions output variable
@@ -103,6 +107,7 @@ jobs:
           echo "accessibility_color=$ACCESSIBILITY_COLOR" >> $GITHUB_ENV
           echo "best_practices_color=$BEST_PRACTICES_COLOR" >> $GITHUB_ENV
           echo "seo_color=$SEO_COLOR" >> $GITHUB_ENV
+          echo "report_link=$REPORT_LINK" >> $GITHUB_ENV
 
       - name: Add results to PR
         id: results_to_pr
@@ -126,4 +131,4 @@ jobs:
             ${{ env.formatted_audits }}
             ```
 
-            *[View Full Report](${{ steps.lighthouse_audit.outputs.links }})*
+            *Detailed Report: [Lighthouse report](${{ env.report_link }})*
