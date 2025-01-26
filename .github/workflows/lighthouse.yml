@@ -60,8 +60,8 @@ jobs:
           if [ -f "$REPORT_PATH" ]; then
             REPORT_CONTENT=$(cat "$REPORT_PATH")
 
-            # Parse failing audits
-            FAILING_AUDITS=$(echo "$REPORT_CONTENT" | jq -r '.audits | to_entries | map(select(.value.score != 1 and .value.details and .value.details.items)) | map("**" + .value.title + "**: " + .value.description + "\nFailing Elements: \n" + (.value.details.items | map(.node.snippet // "No element data") | join("\n"))) | join("\n\n")')
+            # Parse failing audits excluding those with "No element data"
+            FAILING_AUDITS=$(echo "$REPORT_CONTENT" | jq -r '.audits | to_entries | map(select(.value.score != 1 and .value.details and .value.details.items)) | map("**" + .value.title + "**: " + .value.description + "\nFailing Elements: \n" + (.value.details.items | map(.node.snippet // "No element data") | map(select(. != "No element data")) | join("\n"))) | map(select(. != "**:**\nFailing Elements: \n")) | join("\n\n")')
 
             # Default message if no issues
             if [ -z "$FAILING_AUDITS" ]; then
