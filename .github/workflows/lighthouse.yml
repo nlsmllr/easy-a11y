@@ -83,7 +83,7 @@ jobs:
 
             # Set report link
             if [ -f "$HTML_REPORT_PATH" ]; then
-              REPORT_LINK=$(realpath --relative-to="$PWD" "$HTML_REPORT_PATH")
+              REPORT_LINK="https://storage.googleapis.com/${{ github.repository }}/$HTML_REPORT_PATH"
             else
               REPORT_LINK="#"
             fi
