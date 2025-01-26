@@ -57,6 +57,7 @@ jobs:
         run: |
           # Load the detailed JSON report
           REPORT_PATH=$(find .lighthouseci -name "*.report.json" | head -n 1)
+          HTML_REPORT_PATH=$(find .lighthouseci -name "*.report.html" | head -n 1)
           if [ -f "$REPORT_PATH" ]; then
             REPORT_CONTENT=$(cat "$REPORT_PATH")
 
@@ -80,8 +81,12 @@ jobs:
             BEST_PRACTICES_COLOR=$(if [ $BEST_PRACTICES_SCORE -ge 90 ]; then echo "🟢"; elif [ $BEST_PRACTICES_SCORE -ge 50 ]; then echo "🟠"; else echo "🔴"; fi)
             SEO_COLOR=$(if [ $SEO_SCORE -ge 90 ]; then echo "🟢"; elif [ $SEO_SCORE -ge 50 ]; then echo "🟠"; else echo "🔴"; fi)
 
-            # Extract report link
-            REPORT_LINK=$(echo "$REPORT_CONTENT" | jq -r '.finalUrl')
+            # Set report link
+            if [ -f "$HTML_REPORT_PATH" ]; then
+              REPORT_LINK=$(realpath --relative-to="$PWD" "$HTML_REPORT_PATH")
+            else
+              REPORT_LINK="#"
+            fi
           else
             FAILING_AUDITS="Lighthouse report not found."
             PERFORMANCE_SCORE="N/A"
