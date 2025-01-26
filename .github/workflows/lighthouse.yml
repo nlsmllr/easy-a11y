@@ -25,8 +25,6 @@ jobs:
         uses: patrickedqvist/wait-for-vercel-preview@v1.3.1
         id: wait_for_deployment
         with:
-          # 401 Auth Error
-          # using VERCEL_TOKEN: 501 Bad Gateway Error
           token: ${{ secrets.GITHUB_TOKEN }}
           environment: Preview # Ensure this matches exactly with Vercel's environment name
           max_timeout: 1200
@@ -69,12 +67,6 @@ jobs:
 
             for (let i = 0; i < representativeResults.length; i++) {
                 const result = representativeResults[i].summary
-                const audits = representativeResults[i].audits || {}
-                const accessibilityFailures = Object.entries(audits).filter(([key, audit]) => {
-                    return audit.score !== 1 && audit.score !== null && audit.details;
-                }).map(([key, audit]) => {
-                    return `**${audit.title}**: ${audit.description}\nFailing Elements:\n${audit.details.items.map(item => item.node?.snippet || 'No element data').join('\n')}`;
-                }).join('\n\n') || 'No failing accessibility issues detected.';
 
                 const formatResult = (res) => Math.round((res * 100))
                 Object.keys(result).forEach(key => result[key] = formatResult(result[key]))
@@ -92,11 +84,6 @@ jobs:
                     `| ${score(result.seo)} SEO | ${result.seo} |`,
                     ' ',
                     `*Detailed Report: [Lighthouse report](${Object.values(links)[i]})*`,
-                    ' ',
-                    '**Accessibility Failures:**',
-                    '```',
-                    `${accessibilityFailures}`,
-                    '```',
                     ' '
                 )
             }
