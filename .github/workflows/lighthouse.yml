@@ -66,24 +66,23 @@ jobs:
             const comment = ['⚡️ Lighthouse Report for the changes in this PR:', ' ']
 
             for (let i = 0; i < representativeResults.length; i++) {
-                const result = representativeResults[i].summary
+                const result = representativeResults[i]
+                const reportUrl = Object.values(links)[i]
 
-                const formatResult = (res) => Math.round((res * 100))
-                Object.keys(result).forEach(key => result[key] = formatResult(result[key]))
-                
-                const score = res => res >= 90 ? '🟢' : res >= 50 ? '🟠' : '🔴'
-                
                 comment.push(
                     '---',
                     `Results for [${Object.keys(links)[i]}](${Object.keys(links)[i]}):`,
                     '| Category | Score |',
                     '| --- | --- |',
-                    `| ${score(result.performance)} Performance | ${result.performance} |`,
-                    `| ${score(result.accessibility)} Accessibility | ${result.accessibility} |`,
-                    `| ${score(result['best-practices'])} Best practices | ${result['best-practices']} |`,
-                    `| ${score(result.seo)} SEO | ${result.seo} |`,
+                    `| Performance | ${Math.round(result.summary.performance * 100)} |`,
+                    `| Accessibility | ${Math.round(result.summary.accessibility * 100)} |`,
+                    `| Best Practices | ${Math.round(result.summary['best-practices'] * 100)} |`,
+                    `| SEO | ${Math.round(result.summary.seo * 100)} |`,
                     ' ',
-                    `*Detailed Report: [Lighthouse report](${Object.values(links)[i]})*`,
+                    '**Full Report:**',
+                    '```',
+                    `${JSON.stringify(result, null, 2)}`,
+                    '```',
                     ' '
                 )
             }
