@@ -88,10 +88,10 @@ jobs:
 
             | Category | Score |
             | --- | --- |
-            | Performance | ${{ steps.lighthouse_audit.outputs.performance }} |
-            | Accessibility | ${{ steps.lighthouse_audit.outputs.accessibility }} |
-            | Best Practices | ${{ steps.lighthouse_audit.outputs['best-practices'] }} |
-            | SEO | ${{ steps.lighthouse_audit.outputs.seo }} |
+            | 🟢 Performance | ${{ steps.lighthouse_audit.outputs.performance }} |
+            | 🟢 Accessibility | ${{ steps.lighthouse_audit.outputs.accessibility }} |
+            | 🟢 Best Practices | ${{ steps.lighthouse_audit.outputs['best-practices'] }} |
+            | 🟢 SEO | ${{ steps.lighthouse_audit.outputs.seo }} |
 
             **Accessibility Failures:**
             ```
