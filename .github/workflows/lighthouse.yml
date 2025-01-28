@@ -62,30 +62,30 @@ jobs:
             REPORT_CONTENT=$(cat "$REPORT_PATH")
 
             # Parse failing audits and include titles where relevant elements exist
-           FAILING_AUDITS=$(echo "$REPORT_CONTENT" | jq -r '
-            .audits 
-            | to_entries 
-            | map(
-                select(
-                  .value.score != 1 and 
-                  .value.details and 
-                  .value.details.items
+            FAILING_AUDITS=$(echo "$REPORT_CONTENT" | jq -r '
+              .audits 
+              | to_entries 
+              | map(
+                  select(
+                    .value.score != 1 and 
+                    .value.details and 
+                    .value.details.items
+                  ) 
+                  | select(
+                      .value.details.items 
+                      | map(.node.snippet // "No element data") 
+                      | map(select(. != "No element data")) 
+                      | length > 0
+                    )
+                  | (
+                      "**" + .value.title + "**: \n" + 
+                      .value.description + "\n\n" + 
+                      "❗️ Needs your attention:\n" + 
+                      (.value.details.items | map("`" + (.node.snippet // "") + "`") | join("\n\n")) + "\n\n"
+                    )
                 ) 
-                | select(
-                    .value.details.items 
-                    | map(.node.snippet // "No element data") 
-                    | map(select(. != "No element data")) 
-                    | length > 0
-                  )
-                | (
-                    "**" + .value.title + "**: \n" + 
-                    .value.description + "\n\n" + 
-                    "❗️ Needs your attention:\n" + 
-                    (.value.details.items | map("`" + (.node.snippet // "") + "`") | join("\n\n")) + "\n\n"
-                  )
-              ) 
-            | join("\n\n")
-          ')
+              | join("\n\n")
+            ')
 
 
             # Default message if no issues
@@ -105,9 +105,10 @@ jobs:
             BEST_PRACTICES_COLOR=$(if [ $BEST_PRACTICES_SCORE -ge 90 ]; then echo "🟢"; elif [ $BEST_PRACTICES_SCORE -ge 50 ]; then echo "🟠"; else echo "🔴"; fi)
             SEO_COLOR=$(if [ $SEO_SCORE -ge 90 ]; then echo "🟢"; elif [ $SEO_SCORE -ge 50 ]; then echo "🟠"; else echo "🔴"; fi)
 
-            # Set report link
+            # Upload the HTML report to GitHub Actions artifacts for public access
             if [ -f "$HTML_REPORT_PATH" ]; then
-              REPORT_LINK="https://storage.googleapis.com/${{ github.repository }}/$HTML_REPORT_PATH"
+              UPLOADED_ARTIFACT=$(gh upload $HTML_REPORT_PATH --name lighthouse-report.html)
+              REPORT_LINK=$(echo "$UPLOADED_ARTIFACT" | jq -r '.url')
             else
               REPORT_LINK="#"
             fi
@@ -160,4 +161,4 @@ jobs:
             ${{ env.formatted_audits }}
 
             [Current deployment](${{ steps.wait_for_deployment.outputs.url }})
-            Detailed Report: [Lighthouse Report](${HTML_REPORT_PATH})
+            Detailed Report: [Lighthouse Report](${REPORT_LINK})
