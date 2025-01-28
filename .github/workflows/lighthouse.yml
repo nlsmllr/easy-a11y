@@ -81,10 +81,10 @@ jobs:
                     "**" + .value.title + "**: \n" + 
                     .value.description + "\n\n" + 
                     "❗️ Needs your attention:\n" + 
-                    (.value.details.items | map("`" + (.node.snippet // "") + "`") | join("\n"))
+                    (.value.details.items | map("`" + (.node.snippet // "") + "` \n\n") | join("\n\n"))
                   )
               ) 
-            | join("\n\n\n\n\n")
+            | join("\n\n")
           ')
 
 
@@ -146,7 +146,7 @@ jobs:
           number: ${{ github.event.pull_request.number }}
           header: lighthouse
           message: |
-            # Lighthouse Report this Pull Request:
+            # Lighthouse Report for this Pull Request
 
             | Category         | Score |
             | ---------------- | ----- |
@@ -155,7 +155,7 @@ jobs:
             | ${{ env.best_practices_color }} Best Practices | ${{ env.best_practices_score }} |
             | ${{ env.seo_color }} SEO           | ${{ env.seo_score }} |
 
-            # A11Y Checks:
+            # A11y Checks
 
             ${{ env.formatted_audits }}
 
