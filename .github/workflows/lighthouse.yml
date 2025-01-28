@@ -159,4 +159,5 @@ jobs:
 
             ${{ env.formatted_audits }}
 
-            [Detailed Lighthouse report](${{ steps.wait_for_deployment.outputs.url }})
+            [Current deployment](${{ steps.wait_for_deployment.outputs.url }})
+            Detailed Report: [Lighthouse Report](${REPORT_LINK})
