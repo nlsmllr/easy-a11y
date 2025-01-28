@@ -122,7 +122,7 @@ jobs:
           number: ${{ github.event.pull_request.number }}
           header: lighthouse
           message: |
-            ⚡️ Lighthouse Report for the changes in this PR:
+            Lighthouse Report this Pull Request:
 
             | Category         | Score |
             | ---------------- | ----- |
@@ -132,8 +132,7 @@ jobs:
             | ${{ env.seo_color }} SEO           | ${{ env.seo_score }} |
 
             **Accessibility Failures:**
-            ```
             ${{ env.formatted_audits }}
-            ```
+
 
             *Detailed Report: [Lighthouse report](${{ env.report_link }})*
