@@ -80,8 +80,9 @@ jobs:
                 | (
                     "**" + .value.title + "**: \n" + 
                     .value.description + "\n\n" + 
-                    "Needs your attention:\n" + 
-                    (.value.details.items | map("`" + (.node.snippet // "") + "`\n---") | join("\n"))
+                    "❗️ Needs your attention:\n" + 
+                    (.value.details.items | map("`" + (.node.snippet // "") + "`\n-----") | join("\n"))
+                    (.value.details.items | map("`" + (.node.snippet // "") + "`") | join("\n"))
 
 
                   )
@@ -157,7 +158,7 @@ jobs:
             | ${{ env.best_practices_color }} Best Practices | ${{ env.best_practices_score }} |
             | ${{ env.seo_color }} SEO           | ${{ env.seo_score }} |
 
-            # Accessibility Failures:
+            # A11Y Checks:
 
             ${{ env.formatted_audits }}
 
