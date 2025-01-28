@@ -132,6 +132,7 @@ jobs:
             | ${{ env.seo_color }} SEO           | ${{ env.seo_score }} |
 
             **Accessibility Failures:**
+
             ´´´
             ${{ env.formatted_audits }}
             ´´´
