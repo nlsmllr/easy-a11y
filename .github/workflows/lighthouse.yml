@@ -40,124 +40,54 @@ jobs:
           message: |
             Running Lighthouse audit...
 
-      - name: Audit preview build with Lighthouse
-        id: lighthouse_audit
-        uses: treosh/lighthouse-ci-action@v11
-        env:
-          LHCI_BUILD_CONTEXT__CURRENT_HASH: ${{ github.sha }}
-        with:
-          urls: |
-            ${{ steps.wait_for_deployment.outputs.url }}
-          runs: 3 # run 3 times for consistency
-          uploadArtifacts: true
-          temporaryPublicStorage: true
+            - name: Audit preview build with Lighthouse
+              id: lighthouse_audit
+              uses: treosh/lighthouse-ci-action@v11
+              env:
+                LHCI_BUILD_CONTEXT__CURRENT_HASH: ${{ github.sha }}
+              with:
+                urls: |
+                  ${{ steps.wait_for_deployment.outputs.url }}
+                runs: 3 # Run 3 times for consistency
+                uploadArtifacts: true # Upload the report as a GitHub Actions artifact
+                temporaryPublicStorage: true # Ensure temporary public storage for Lighthouse report
 
-      - name: Extract and format Lighthouse details
-        id: format_lighthouse_details
-        run: |
-          # Load the detailed JSON report
-          REPORT_PATH=$(find .lighthouseci -name "*.report.json" | head -n 1)
-          HTML_REPORT_PATH=$(find .lighthouseci -name "*.report.html" | head -n 1)
-          if [ -f "$REPORT_PATH" ]; then
-            REPORT_CONTENT=$(cat "$REPORT_PATH")
+            - name: Extract and format Lighthouse details
+              id: format_lighthouse_details
+              run: |
+                REPORT_PATH=$(find .lighthouseci -name "*.report.json" | head -n 1)
+                HTML_REPORT_PATH=$(find .lighthouseci -name "*.report.html" | head -n 1)
+                if [ -f "$HTML_REPORT_PATH" ]; then
+                  # Upload the HTML report as an artifact
+                  echo "::set-output name=html_report_path::$HTML_REPORT_PATH"
+                else
+                  echo "Lighthouse report not found."
+                  HTML_REPORT_PATH=""
+                fi
+                echo "report_link=https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts" >> $GITHUB_ENV
 
-            # Parse failing audits and include titles where relevant elements exist
-           FAILING_AUDITS=$(echo "$REPORT_CONTENT" | jq -r '
-            .audits 
-            | to_entries 
-            | map(
-                select(
-                  .value.score != 1 and 
-                  .value.details and 
-                  .value.details.items
-                ) 
-                | select(
-                    .value.details.items 
-                    | map(.node.snippet // "No element data") 
-                    | map(select(. != "No element data")) 
-                    | length > 0
-                  )
-                | (
-                    "**" + .value.title + "**: \n" + 
-                    .value.description + "\n\n" + 
-                    "❗️ Needs your attention:\n" + 
-                    (.value.details.items | map("`" + (.node.snippet // "") + "`") | join("\n\n")) + "\n\n"
-                  )
-              ) 
-            | join("\n\n")
-          ')
+            - name: Upload Lighthouse HTML Report
+              if: ${{ steps.format_lighthouse_details.outputs.html_report_path != '' }}
+              uses: actions/upload-artifact@v3
+              with:
+                name: lighthouse-report
+                path: ${{ steps.format_lighthouse_details.outputs.html_report_path }}
 
+            - name: Add results to PR
+              id: results_to_pr
+              uses: marocchino/sticky-pull-request-comment@v2.9.0
+              with:
+                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                number: ${{ github.event.pull_request.number }}
+                header: lighthouse
+                message: |
+                  ⚡️ Lighthouse Report for the changes in this PR:
 
-            # Default message if no issues
-            if [ -z "$FAILING_AUDITS" ]; then
-              FAILING_AUDITS="No failing accessibility issues detected."
-            fi
+                  | Category         | Score |
+                  | ---------------- | ----- |
+                  | 🟢 Performance   | ${{ env.performance_score }} |
+                  | 🟠 Accessibility | ${{ env.accessibility_score }} |
+                  | 🟢 Best Practices| ${{ env.best_practices_score }} |
+                  | 🟢 SEO           | ${{ env.seo_score }} |
 
-            # Extract scores
-            PERFORMANCE_SCORE=$(echo "$REPORT_CONTENT" | jq -r '.categories.performance.score * 100 | floor')
-            ACCESSIBILITY_SCORE=$(echo "$REPORT_CONTENT" | jq -r '.categories.accessibility.score * 100 | floor')
-            BEST_PRACTICES_SCORE=$(echo "$REPORT_CONTENT" | jq -r '.categories["best-practices"].score * 100 | floor')
-            SEO_SCORE=$(echo "$REPORT_CONTENT" | jq -r '.categories.seo.score * 100 | floor')
-
-            # Assign colors based on score thresholds
-            PERFORMANCE_COLOR=$(if [ $PERFORMANCE_SCORE -ge 90 ]; then echo "🟢"; elif [ $PERFORMANCE_SCORE -ge 50 ]; then echo "🟠"; else echo "🔴"; fi)
-            ACCESSIBILITY_COLOR=$(if [ $ACCESSIBILITY_SCORE -ge 90 ]; then echo "🟢"; elif [ $ACCESSIBILITY_SCORE -ge 50 ]; then echo "🟠"; else echo "🔴"; fi)
-            BEST_PRACTICES_COLOR=$(if [ $BEST_PRACTICES_SCORE -ge 90 ]; then echo "🟢"; elif [ $BEST_PRACTICES_SCORE -ge 50 ]; then echo "🟠"; else echo "🔴"; fi)
-            SEO_COLOR=$(if [ $SEO_SCORE -ge 90 ]; then echo "🟢"; elif [ $SEO_SCORE -ge 50 ]; then echo "🟠"; else echo "🔴"; fi)
-
-            # Set report link
-            if [ -f "$HTML_REPORT_PATH" ]; then
-              REPORT_LINK="https://storage.googleapis.com/${{ github.repository }}/$HTML_REPORT_PATH"
-            else
-              REPORT_LINK="#"
-            fi
-          else
-            FAILING_AUDITS="Lighthouse report not found."
-            PERFORMANCE_SCORE="N/A"
-            ACCESSIBILITY_SCORE="N/A"
-            BEST_PRACTICES_SCORE="N/A"
-            SEO_SCORE="N/A"
-            PERFORMANCE_COLOR="🔴"
-            ACCESSIBILITY_COLOR="🔴"
-            BEST_PRACTICES_COLOR="🔴"
-            SEO_COLOR="🔴"
-            REPORT_LINK="#"
-          fi
-
-          # Save the output to a GitHub Actions output variable
-          echo "formatted_audits<<EOF" >> $GITHUB_ENV
-          echo "$FAILING_AUDITS" >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
-          echo "performance_score=$PERFORMANCE_SCORE" >> $GITHUB_ENV
-          echo "accessibility_score=$ACCESSIBILITY_SCORE" >> $GITHUB_ENV
-          echo "best_practices_score=$BEST_PRACTICES_SCORE" >> $GITHUB_ENV
-          echo "seo_score=$SEO_SCORE" >> $GITHUB_ENV
-          echo "performance_color=$PERFORMANCE_COLOR" >> $GITHUB_ENV
-          echo "accessibility_color=$ACCESSIBILITY_COLOR" >> $GITHUB_ENV
-          echo "best_practices_color=$BEST_PRACTICES_COLOR" >> $GITHUB_ENV
-          echo "seo_color=$SEO_COLOR" >> $GITHUB_ENV
-          echo "report_link=$REPORT_LINK" >> $GITHUB_ENV
-
-      - name: Add results to PR
-        id: results_to_pr
-        uses: marocchino/sticky-pull-request-comment@v2.9.0
-        with:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          number: ${{ github.event.pull_request.number }}
-          header: lighthouse
-          message: |
-            # Lighthouse Report for this PR
-
-            | Category         | Score |
-            | ---------------- | ----- |
-            | ${{ env.performance_color }} Performance    | ${{ env.performance_score }} |
-            | ${{ env.accessibility_color }} Accessibility | ${{ env.accessibility_score }} |
-            | ${{ env.best_practices_color }} Best Practices | ${{ env.best_practices_score }} |
-            | ${{ env.seo_color }} SEO           | ${{ env.seo_score }} |
-
-            # A11y Checks
-
-            ${{ env.formatted_audits }}
-
-            [Current deployment](${{ steps.wait_for_deployment.outputs.url }})
-            Detailed Report: [Lighthouse Report](${REPORT_LINK})
+                  *Detailed Report: [Download Lighthouse Report](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts)*
