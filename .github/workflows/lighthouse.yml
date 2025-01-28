@@ -160,4 +160,4 @@ jobs:
             ${{ env.formatted_audits }}
 
             [Current deployment](${{ steps.wait_for_deployment.outputs.url }})
-            Detailed Report: [Lighthouse Report](${REPORT_LINK})
+            Detailed Report: [Lighthouse Report](${HTML_REPORT_PATH})
