@@ -62,7 +62,7 @@ jobs:
             REPORT_CONTENT=$(cat "$REPORT_PATH")
 
             # Parse failing audits and include titles where relevant elements exist
-            FAILING_AUDITS=$(echo "$REPORT_CONTENT" | jq -r '.audits | to_entries | map(select(.value.score != 1 and .value.details and .value.details.items)) | map(select(.value.details.items | map(.node.snippet // "No element data") | map(select(. != "No element data")) | length > 0) | ("**" + .value.title + "**: " + .value.description + "\nNeeds your attention: \n" + (.value.details.items | map(.node.snippet // "") | join("\n")))) | join("\n\n—————\n"\n"")')
+            FAILING_AUDITS=$(echo "$REPORT_CONTENT" | jq -r '.audits | to_entries | map(select(.value.score != 1 and .value.details and .value.details.items)) | map(select(.value.details.items | map(.node.snippet // "No element data") | map(select(. != "No element data")) | length > 0) | ("**" + .value.title + "**: " + .value.description + "\nNeeds your attention: \n" + (.value.details.items | map(.node.snippet // "") | join("\n")))) | join("\n\n-----\n"\n"")')
 
             # Default message if no issues
             if [ -z "$FAILING_AUDITS" ]; then
