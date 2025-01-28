@@ -87,7 +87,6 @@ jobs:
               | join("\n\n")
             ')
 
-
             # Default message if no issues
             if [ -z "$FAILING_AUDITS" ]; then
               FAILING_AUDITS="No failing accessibility issues detected."
@@ -105,10 +104,12 @@ jobs:
             BEST_PRACTICES_COLOR=$(if [ $BEST_PRACTICES_SCORE -ge 90 ]; then echo "🟢"; elif [ $BEST_PRACTICES_SCORE -ge 50 ]; then echo "🟠"; else echo "🔴"; fi)
             SEO_COLOR=$(if [ $SEO_SCORE -ge 90 ]; then echo "🟢"; elif [ $SEO_SCORE -ge 50 ]; then echo "🟠"; else echo "🔴"; fi)
 
-            # Upload the HTML report to GitHub Actions artifacts for public access
+            # Use the ephemeral public URL from the Lighthouse action (temporaryPublicStorage: true)
             if [ -f "$HTML_REPORT_PATH" ]; then
-              UPLOADED_ARTIFACT=$(gh upload $HTML_REPORT_PATH --name lighthouse-report.html)
-              REPORT_LINK=$(echo "$UPLOADED_ARTIFACT" | jq -r '.url')
+              REPORT_LINK="${{ steps.lighthouse_audit.outputs.uploadUrl }}"
+              if [ -z "$REPORT_LINK" ]; then
+                REPORT_LINK="#"
+              fi
             else
               REPORT_LINK="#"
             fi
