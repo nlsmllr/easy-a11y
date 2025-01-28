@@ -81,8 +81,7 @@ jobs:
                     "**" + .value.title + "**: \n" + 
                     .value.description + "\n\n" + 
                     "❗️ Needs your attention:\n" + 
-                    (.value.details.items | map("`" + (.node.snippet // "") + "`") | join("\n\n"))
-                    "\n\n"
+                    (.value.details.items | map("`" + (.node.snippet // "") + "`") | join("\n\n")) + "\n\n"
                   )
               ) 
             | join("\n\n")
@@ -147,7 +146,7 @@ jobs:
           number: ${{ github.event.pull_request.number }}
           header: lighthouse
           message: |
-            # Lighthouse Report for this Pull Request
+            # Lighthouse Report for this PR
 
             | Category         | Score |
             | ---------------- | ----- |
