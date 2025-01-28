@@ -133,8 +133,8 @@ jobs:
 
             **Accessibility Failures:**
 
-            ´´´
+            ```
             ${{ env.formatted_audits }}
-            ´´´
+            ```
 
             *Detailed Report: [Lighthouse report](${{ env.report_link }})*
