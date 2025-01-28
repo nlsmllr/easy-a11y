@@ -81,7 +81,8 @@ jobs:
                     "**" + .value.title + "**: \n" + 
                     .value.description + "\n\n" + 
                     "❗️ Needs your attention:\n" + 
-                    (.value.details.items | map("`" + (.node.snippet // "") + "`\n-----") | join("\n"))
+                    (.value.details.items | map("`" + (.node.snippet // "") + "`") | join("\n\n"))
+
                   )
               ) 
             | join("\n\n")
