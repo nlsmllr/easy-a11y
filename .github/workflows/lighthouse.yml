@@ -98,6 +98,7 @@ jobs:
           fi
 
 
+
             # Extract scores
             PERFORMANCE_SCORE=$(echo "$REPORT_CONTENT" | jq -r '.categories.performance.score * 100 | floor')
             ACCESSIBILITY_SCORE=$(echo "$REPORT_CONTENT" | jq -r '.categories.accessibility.score * 100 | floor')
