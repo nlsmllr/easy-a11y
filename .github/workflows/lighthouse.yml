@@ -78,8 +78,14 @@ jobs:
                 .categories.accessibility.auditRefs
                 | map(select(.id and .id != null))
                 | map(.id) as $accessibility_ids
-                | .audits
-                | to_entries
+                | if (.audits | type) == "object" then
+                    .audits
+                    | to_entries
+                  elif (.audits | type) == "array" then
+                    .audits
+                  else
+                    []
+                  end
                 | map(
                     select(.key as $id | $accessibility_ids | index($id) != null)
                     | select(
