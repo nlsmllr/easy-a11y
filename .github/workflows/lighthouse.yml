@@ -77,14 +77,18 @@ jobs:
               No accessibility issues found!**"
             else
               FAILING_AUDITS=$(echo "$REPORT_CONTENT" | jq -r '
-                .audits 
+                .categories.accessibility.auditRefs 
+                | map(select(.score != 1)) 
+                | map(.id) 
+                | . as $failing_accessibility_ids 
+                | .audits 
                 | to_entries 
                 | map(
-                    select(
-                      .value.score != 1 and 
-                      .value.details and 
-                      .value.details.items
-                    ) 
+                    select(.key as $id | $failing_accessibility_ids | index($id))
+                    | select(
+                        .value.details and 
+                        .value.details.items
+                      )
                     | select(
                         .value.details.items 
                         | map(.node.snippet // "No element data") 
@@ -100,6 +104,7 @@ jobs:
                   ) 
                 | join("\n\n")
               ')
+
 
               # Default message if no issues but not perfect score
               if [ -z "$FAILING_AUDITS" ]; then
@@ -157,6 +162,6 @@ jobs:
 
             # A11y Checks
             ${{ env.formatted_audits }}
-            -----
+
             [Current deployment](${{ steps.wait_for_deployment.outputs.url }})
             [Lighthouse report](${REPORT_LINK})
