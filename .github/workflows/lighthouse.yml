@@ -96,13 +96,11 @@ jobs:
             PERFORMANCE_SCORE=$(echo "$REPORT_CONTENT" | jq -r '.categories.performance.score * 100 | floor')
             ACCESSIBILITY_SCORE=$(echo "$REPORT_CONTENT" | jq -r '.categories.accessibility.score * 100 | floor')
             BEST_PRACTICES_SCORE=$(echo "$REPORT_CONTENT" | jq -r '.categories["best-practices"].score * 100 | floor')
-            SEO_SCORE=$(echo "$REPORT_CONTENT" | jq -r '.categories.seo.score * 100 | floor')
 
             # Assign colors based on score thresholds
             PERFORMANCE_COLOR=$(if [ $PERFORMANCE_SCORE -ge 90 ]; then echo "🟢"; elif [ $PERFORMANCE_SCORE -ge 50 ]; then echo "🟠"; else echo "🔴"; fi)
             ACCESSIBILITY_COLOR=$(if [ $ACCESSIBILITY_SCORE -ge 90 ]; then echo "🟢"; elif [ $ACCESSIBILITY_SCORE -ge 50 ]; then echo "🟠"; else echo "🔴"; fi)
             BEST_PRACTICES_COLOR=$(if [ $BEST_PRACTICES_SCORE -ge 90 ]; then echo "🟢"; elif [ $BEST_PRACTICES_SCORE -ge 50 ]; then echo "🟠"; else echo "🔴"; fi)
-            SEO_COLOR=$(if [ $SEO_SCORE -ge 90 ]; then echo "🟢"; elif [ $SEO_SCORE -ge 50 ]; then echo "🟠"; else echo "🔴"; fi)
 
             # Use the ephemeral public URL from the Lighthouse action (temporaryPublicStorage: true)
             if [ -f "$HTML_REPORT_PATH" ]; then
@@ -118,11 +116,9 @@ jobs:
             PERFORMANCE_SCORE="N/A"
             ACCESSIBILITY_SCORE="N/A"
             BEST_PRACTICES_SCORE="N/A"
-            SEO_SCORE="N/A"
             PERFORMANCE_COLOR="🔴"
             ACCESSIBILITY_COLOR="🔴"
             BEST_PRACTICES_COLOR="🔴"
-            SEO_COLOR="🔴"
             REPORT_LINK="#"
           fi
 
@@ -133,11 +129,9 @@ jobs:
           echo "performance_score=$PERFORMANCE_SCORE" >> $GITHUB_ENV
           echo "accessibility_score=$ACCESSIBILITY_SCORE" >> $GITHUB_ENV
           echo "best_practices_score=$BEST_PRACTICES_SCORE" >> $GITHUB_ENV
-          echo "seo_score=$SEO_SCORE" >> $GITHUB_ENV
           echo "performance_color=$PERFORMANCE_COLOR" >> $GITHUB_ENV
           echo "accessibility_color=$ACCESSIBILITY_COLOR" >> $GITHUB_ENV
           echo "best_practices_color=$BEST_PRACTICES_COLOR" >> $GITHUB_ENV
-          echo "seo_color=$SEO_COLOR" >> $GITHUB_ENV
           echo "report_link=$REPORT_LINK" >> $GITHUB_ENV
 
       - name: Add results to PR
@@ -155,7 +149,6 @@ jobs:
             | ${{ env.performance_color }} Performance    | ${{ env.performance_score }} |
             | ${{ env.accessibility_color }} Accessibility | ${{ env.accessibility_score }} |
             | ${{ env.best_practices_color }} Best Practices | ${{ env.best_practices_score }} |
-            | ${{ env.seo_color }} SEO           | ${{ env.seo_score }} |
 
             # A11y Checks
 
