@@ -77,41 +77,41 @@ jobs:
               No accessibility issues found!**"
             else
               FAILING_AUDITS=$(jq -r '
-              if has("categories") and .categories.accessibility then
-                .categories.accessibility.auditRefs 
-                | map(select(.score != 1)) 
-                | map(.id) 
-                | . as $failing_accessibility_ids 
-                | if has("audits") then 
-                    .audits 
-                    | to_entries 
-                    | map(
-                        select(.key as $id | $failing_accessibility_ids | index($id))
-                        | select(
-                            .value.details and 
-                            .value.details.items
-                          )
-                        | select(
-                            .value.details.items 
-                            | map(.node.snippet // "No element data") 
-                            | map(select(. != "No element data")) 
-                            | length > 0
-                          )
-                        | (
-                            "**" + .value.title + "**: \n" + 
-                            .value.description + "\n\n" + 
-                            "❗️ Might need your attention:\n" + 
-                            (.value.details.items | map("`" + (.node.snippet // "") + "`") | join("\n\n")) + "\n\n"
-                          )
-                      ) 
-                    | join("\n\n")
-                  else
-                    "No accessibility audits found in the report."
-                  end
-              else 
-                "Lighthouse report does not contain accessibility data."
-              end
-            ' "$REPORT_PATH")
+                if has("categories") and .categories.accessibility then
+                  .categories.accessibility.auditRefs 
+                  | map(select(.score != 1)) 
+                  | map(.id) 
+                  | . as $failing_accessibility_ids 
+                  | if has("audits") then 
+                      .audits 
+                      | to_entries 
+                      | map(
+                          select(.key as $id | $failing_accessibility_ids | index($id))
+                          | select(
+                              .value.details and 
+                              .value.details.items
+                            )
+                          | select(
+                              .value.details.items 
+                              | map(.node.snippet // "No element data") 
+                              | map(select(. != "No element data")) 
+                              | length > 0
+                            )
+                          | (
+                              "**" + .value.title + "**: \n" + 
+                              .value.description + "\n\n" + 
+                              "❗️ Might need your attention:\n" + 
+                              (.value.details.items | map("`" + (.node.snippet // "") + "`") | join("\n\n")) + "\n\n"
+                            )
+                        ) 
+                      | join("\n\n")
+                    else
+                      "No accessibility audits found in the report."
+                    end
+                else 
+                  "Lighthouse report does not contain accessibility data."
+                end
+              ' "$REPORT_PATH")
 
 
             # Use the ephemeral public URL from the Lighthouse action (temporaryPublicStorage: true)
