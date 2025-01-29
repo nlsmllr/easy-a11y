@@ -72,41 +72,37 @@ jobs:
             ACCESSIBILITY_COLOR=$(if [ $ACCESSIBILITY_SCORE -ge 90 ]; then echo "🟢"; elif [ $ACCESSIBILITY_SCORE -ge 50 ]; then echo "🟠"; else echo "🔴"; fi)
             BEST_PRACTICES_COLOR=$(if [ $BEST_PRACTICES_SCORE -ge 90 ]; then echo "🟢"; elif [ $BEST_PRACTICES_SCORE -ge 50 ]; then echo "🟠"; else echo "🔴"; fi)
 
-            # Extract failing accessibility audits only
+            # Extract failing accessibility audits
             FAILING_AUDITS=$(jq -r '
               if has("categories") and .categories.accessibility and has("audits") then
-                .categories.accessibility.auditRefs 
-                | map(.id) 
-                | . as $accessibility_ids 
-                | if type == "object" then 
-                    .audits 
-                    | to_entries 
-                    | map(
-                        select(.key as $id | $accessibility_ids | index($id))
-                        | select(
-                            .value.score != 1 and
-                            .value.details and 
-                            .value.details.items
-                          )
-                        | select(
-                            .value.details.items 
-                            | map(.node.snippet // "No element data") 
-                            | map(select(. != "No element data")) 
-                            | length > 0
-                          )
-                        | (
-                            "**" + .value.title + "**: \n" + 
-                            .value.description + "\n\n" + 
-                            "❗️ Might need your attention:\n" + 
-                            (.value.details.items | map("`" + (.node.snippet // "") + "`") | join("\n\n")) + "\n\n"
-                          )
-                      ) 
-                    | join("\n\n")
-                  else
-                    "No accessibility audits found in the report."
-                  end
-              else 
-                "Lighthouse report does not contain accessibility data."
+                .categories.accessibility.auditRefs
+                | map(select(.id and .id != null))
+                | map(.id) as $accessibility_ids
+                | .audits
+                | to_entries
+                | map(
+                    select(.key as $id | $accessibility_ids | index($id) != null)
+                    | select(
+                        .value.score < 1 and
+                        .value.details and 
+                        .value.details.items
+                      )
+                    | select(
+                        .value.details.items 
+                        | map(.node.snippet // "No element data") 
+                        | map(select(. != "No element data")) 
+                        | length > 0
+                      )
+                    | (
+                        "**" + .value.title + "**: \n" + 
+                        .value.description + "\n\n" + 
+                        "❗️ Might need your attention:\n" + 
+                        (.value.details.items | map("`" + (.node.snippet // "") + "`") | join("\n\n")) + "\n\n"
+                      )
+                  )
+                | join("\n\n")
+              else
+                "No accessibility audits found in the report."
               end
             ' "$REPORT_PATH")
 
