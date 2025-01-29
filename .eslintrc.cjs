@@ -4,7 +4,7 @@ module.exports = {
     'plugin:storybook/recommended',
     'plugin:@typescript-eslint/recommended-type-checked',
     'prettier',
-    'plugin:jsx-a11y/recommended',
+    'plugin:jsx-a11y/strict',
   ],
   parser: '@typescript-eslint/parser',
   parserOptions: {
