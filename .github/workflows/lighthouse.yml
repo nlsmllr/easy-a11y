@@ -73,8 +73,7 @@ jobs:
 
             # Determine whether to include detailed audits
             if [ "$ACCESSIBILITY_SCORE" -eq 100 ]; then
-              FAILING_AUDITS="**🎉 You're all set!
-                No accessibility issues found!**"
+              FAILING_AUDITS="**🎉 You're all set!\n\tNo accessibility issues found!**"
             else
               FAILING_AUDITS=$(echo "$REPORT_CONTENT" | jq -r '
                 .audits 
