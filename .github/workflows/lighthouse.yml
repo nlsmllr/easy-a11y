@@ -61,37 +61,6 @@ jobs:
           if [ -f "$REPORT_PATH" ]; then
             REPORT_CONTENT=$(cat "$REPORT_PATH")
 
-            # Parse failing audits and include titles where relevant elements exist
-            FAILING_AUDITS=$(echo "$REPORT_CONTENT" | jq -r '
-              .audits 
-              | to_entries 
-              | map(
-                  select(
-                    .value.score != 1 and 
-                    .value.details and 
-                    .value.details.items
-                  ) 
-                  | select(
-                      .value.details.items 
-                      | map(.node.snippet // "No element data") 
-                      | map(select(. != "No element data")) 
-                      | length > 0
-                    )
-                  | (
-                      "**" + .value.title + "**: \n" + 
-                      .value.description + "\n\n" + 
-                      "❗️ Might need your attention:\n" + 
-                      (.value.details.items | map("`" + (.node.snippet // "") + "`") | join("\n\n")) + "\n\n"
-                    )
-                ) 
-              | join("\n\n")
-            ')
-
-            # Default message if no issues
-            if [ -z "$FAILING_AUDITS" ]; then
-              FAILING_AUDITS="No failing accessibility issues detected."
-            fi
-
             # Extract scores
             PERFORMANCE_SCORE=$(echo "$REPORT_CONTENT" | jq -r '.categories.performance.score * 100 | floor')
             ACCESSIBILITY_SCORE=$(echo "$REPORT_CONTENT" | jq -r '.categories.accessibility.score * 100 | floor')
@@ -101,6 +70,41 @@ jobs:
             PERFORMANCE_COLOR=$(if [ $PERFORMANCE_SCORE -ge 90 ]; then echo "🟢"; elif [ $PERFORMANCE_SCORE -ge 50 ]; then echo "🟠"; else echo "🔴"; fi)
             ACCESSIBILITY_COLOR=$(if [ $ACCESSIBILITY_SCORE -ge 90 ]; then echo "🟢"; elif [ $ACCESSIBILITY_SCORE -ge 50 ]; then echo "🟠"; else echo "🔴"; fi)
             BEST_PRACTICES_COLOR=$(if [ $BEST_PRACTICES_SCORE -ge 90 ]; then echo "🟢"; elif [ $BEST_PRACTICES_SCORE -ge 50 ]; then echo "🟠"; else echo "🔴"; fi)
+
+            # Determine whether to include detailed audits
+            if [ "$ACCESSIBILITY_SCORE" -eq 100 ]; then
+              FAILING_AUDITS="🎉 You're all set! No accessibility issues found."
+            else
+              FAILING_AUDITS=$(echo "$REPORT_CONTENT" | jq -r '
+                .audits 
+                | to_entries 
+                | map(
+                    select(
+                      .value.score != 1 and 
+                      .value.details and 
+                      .value.details.items
+                    ) 
+                    | select(
+                        .value.details.items 
+                        | map(.node.snippet // "No element data") 
+                        | map(select(. != "No element data")) 
+                        | length > 0
+                      )
+                    | (
+                        "**" + .value.title + "**: \n" + 
+                        .value.description + "\n\n" + 
+                        "❗️ Might need your attention:\n" + 
+                        (.value.details.items | map("`" + (.node.snippet // "") + "`") | join("\n\n")) + "\n\n"
+                      )
+                  ) 
+                | join("\n\n")
+              ')
+
+              # Default message if no issues but not perfect score
+              if [ -z "$FAILING_AUDITS" ]; then
+                FAILING_AUDITS="No failing accessibility issues detected."
+              fi
+            fi
 
             # Use the ephemeral public URL from the Lighthouse action (temporaryPublicStorage: true)
             if [ -f "$HTML_REPORT_PATH" ]; then
