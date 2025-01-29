@@ -157,7 +157,6 @@ jobs:
 
             # A11y Checks
             ${{ env.formatted_audits }}
-            "---"
-            [View Report](${{ env.report_link }})
+            -----
             [Current deployment](${{ steps.wait_for_deployment.outputs.url }})
             [Lighthouse report](${REPORT_LINK})
