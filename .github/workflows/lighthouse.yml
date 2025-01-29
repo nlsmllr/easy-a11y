@@ -156,8 +156,6 @@ jobs:
             | ${{ env.best_practices_color }} Best Practices | ${{ env.best_practices_score }} |
 
             # A11y Checks
-
             ${{ env.formatted_audits }}
-
             [Current deployment](${{ steps.wait_for_deployment.outputs.url }})
-            Detailed Report: [Lighthouse Report](${REPORT_LINK})
+            [Lighthouse report](${REPORT_LINK})
