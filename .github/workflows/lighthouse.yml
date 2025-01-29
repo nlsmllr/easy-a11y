@@ -55,40 +55,39 @@ jobs:
       - name: Extract and format Lighthouse details
         id: format_lighthouse_details
         run: |
-          # Load the detailed JSON report
+          # Correct the find command syntax for JSON and HTML reports
           REPORT_PATH=$(find .lighthouseci -name "*.report.json" | head -n 1)
-          HTML_REPORT_PATH=$(find .lighthouseci - name "*.report.html" | head -n 1)
+          HTML_REPORT_PATH=$(find .lighthouseci -name "*.report.html" | head -n 1)
+
           if [ -f "$REPORT_PATH" ]; then
             REPORT_CONTENT=$(cat "$REPORT_PATH")
 
-            # Parse failing audits but only for accessibility
+            # Adjust jq command to safely use startswith and focus on accessibility audits
             FAILING_AUDITS=$(echo "$REPORT_CONTENT" | jq -r '
               .audits 
               | to_entries 
+              | map(select(.value.score != 1 and .value.details and .value.details.items))
               | map(
-                  select(
-                    .value.score != 1 and 
-                    .value.details and 
-                    .value.details.items and 
-                    .key | startswith("accessibility")
-                  ) 
-                  | select(
-                      .value.details.items 
-                      | map(.node.snippet // "No element data") 
-                      | map(select(. != "No element data")) 
-                      | length > 0
-                    )
-                  | (
-                      "**" + .value.title + "**: \n" + 
-                      .value.description + "\n\n" + 
-                      "❗️ Might need your attention:\n" + 
-                      (.value.details.items | map("`" + (.node.snippet // "") + "`") | join("\n\n")) + "\n\n"
-                    )
-                ) 
+                  select(.key | tostring | startswith("accessibility"))
+                  | {
+                    title: .value.title,
+                    description: .value.description,
+                    items: .value.details.items | map("`" + (.node.snippet // "No element data") + "`")
+                  }
+                )
+              | map(
+                  if .items | length > 0 then
+                    "**" + .title + "**: \n" + 
+                    .description + "\n\n" + 
+                    "❗️ Might need your attention:\n" + 
+                    (.items | join("\n\n")) + "\n\n"
+                  else
+                    ""
+                  end
+                )
               | join("\n\n")
             ')
 
-            # Default message if no issues
             if [ -z "$FAILING_AUDITS" ]; then
               FAILING_AUDITS="No failing accessibility issues detected."
             fi
