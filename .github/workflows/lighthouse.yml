@@ -58,6 +58,7 @@ jobs:
           # Load the detailed JSON report
           REPORT_PATH=$(find .lighthouseci -name "*.report.json" | head -n 1)
           HTML_REPORT_PATH=$(find .lighthouseci -name "*.report.html" | head -n 1)
+
           if [ -f "$REPORT_PATH" ]; then
             REPORT_CONTENT=$(cat "$REPORT_PATH")
 
@@ -71,48 +72,48 @@ jobs:
             ACCESSIBILITY_COLOR=$(if [ $ACCESSIBILITY_SCORE -ge 90 ]; then echo "🟢"; elif [ $ACCESSIBILITY_SCORE -ge 50 ]; then echo "🟠"; else echo "🔴"; fi)
             BEST_PRACTICES_COLOR=$(if [ $BEST_PRACTICES_SCORE -ge 90 ]; then echo "🟢"; elif [ $BEST_PRACTICES_SCORE -ge 50 ]; then echo "🟠"; else echo "🔴"; fi)
 
-            # Determine whether to include detailed audits
-            if [ "$ACCESSIBILITY_SCORE" -eq 100 ]; then
-              FAILING_AUDITS="**🎉 You're all set!
-              No accessibility issues found!**"
-            else
-              FAILING_AUDITS=$(jq -r '
-                if has("categories") and .categories.accessibility then
-                  .categories.accessibility.auditRefs 
-                  | map(select(.score != 1)) 
-                  | map(.id) 
-                  | . as $failing_accessibility_ids 
-                  | if has("audits") then 
-                      .audits 
-                      | to_entries 
-                      | map(
-                          select(.key as $id | $failing_accessibility_ids | index($id))
-                          | select(
-                              .value.details and 
-                              .value.details.items
-                            )
-                          | select(
-                              .value.details.items 
-                              | map(.node.snippet // "No element data") 
-                              | map(select(. != "No element data")) 
-                              | length > 0
-                            )
-                          | (
-                              "**" + .value.title + "**: \n" + 
-                              .value.description + "\n\n" + 
-                              "❗️ Might need your attention:\n" + 
-                              (.value.details.items | map("`" + (.node.snippet // "") + "`") | join("\n\n")) + "\n\n"
-                            )
-                        ) 
-                      | join("\n\n")
-                    else
-                      "No accessibility audits found in the report."
-                    end
-                else 
-                  "Lighthouse report does not contain accessibility data."
-                end
-              ' "$REPORT_PATH")
+            # Extract failing accessibility audits only
+            FAILING_AUDITS=$(jq -r '
+              if has("categories") and .categories.accessibility then
+                .categories.accessibility.auditRefs 
+                | map(select(.score != 1)) 
+                | map(.id) 
+                | . as $failing_accessibility_ids 
+                | if has("audits") then 
+                    .audits 
+                    | to_entries 
+                    | map(
+                        select(.key as $id | $failing_accessibility_ids | index($id))
+                        | select(
+                            .value.details and 
+                            .value.details.items
+                          )
+                        | select(
+                            .value.details.items 
+                            | map(.node.snippet // "No element data") 
+                            | map(select(. != "No element data")) 
+                            | length > 0
+                          )
+                        | (
+                            "**" + .value.title + "**: \n" + 
+                            .value.description + "\n\n" + 
+                            "❗️ Might need your attention:\n" + 
+                            (.value.details.items | map("`" + (.node.snippet // "") + "`") | join("\n\n")) + "\n\n"
+                          )
+                      ) 
+                    | join("\n\n")
+                  else
+                    "No accessibility audits found in the report."
+                  end
+              else 
+                "Lighthouse report does not contain accessibility data."
+              end
+            ' "$REPORT_PATH")
 
+            # Default message if no issues but not perfect score
+            if [ -z "$FAILING_AUDITS" ]; then
+              FAILING_AUDITS="No failing accessibility issues detected."
+            fi
 
             # Use the ephemeral public URL from the Lighthouse action (temporaryPublicStorage: true)
             if [ -f "$HTML_REPORT_PATH" ]; then
