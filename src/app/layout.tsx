@@ -1,7 +1,6 @@
 import './globals.css';
 
 import localFont from 'next/font/local';
-import Head from 'next/head';
 
 const geistSans = localFont({
   src: './fonts/GeistVF.woff',
@@ -17,14 +16,14 @@ const geistMono = localFont({
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
-      <Head>
+      <head>
         <meta
           title="easey a11y"
           property="property"
           name="description"
           content="easy a11y - A simple and accessible solution for web development."
         />
-      </Head>
+      </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>{children}</body>
     </html>
   );
