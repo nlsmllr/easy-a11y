@@ -17,7 +17,7 @@ on:
 jobs:
   generate_html_validator_audit:
     # TODO: change back to 30 min
-    timeout-minutes: 1
+    timeout-minutes: 30
     runs-on: ubuntu-latest
     steps:
       - name: Wait for the Vercel deployment
@@ -27,7 +27,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           environment: Preview
           # TODO: change back to 1200
-          max_timeout: 10
+          max_timeout: 1200
 
       - name: Add comment to PR
         id: loading_comment_to_pr
