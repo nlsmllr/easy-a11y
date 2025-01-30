@@ -74,7 +74,7 @@ jobs:
           script: |
             const fs = require('fs');
             const results = fs.readFileSync('validation_results.txt', 'utf-8').split('\n\n');
-            const comment = ['# HTML Validation Report for the changes in this PR', ' ']
+            const comment = ['# HTML Validation Report for this PR', ' ']
             results.forEach(result => {
               if (result.trim() !== '') {
                 const [url, ...messages] = result.split('\n');
