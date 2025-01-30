@@ -16,13 +16,8 @@ const geistMono = localFont({
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
-      <head>
-        <meta
-          title="easey a11y"
-          property="property"
-          name="description"
-          content="easy a11y - A simple and accessible solution for web development."
-        />
+      <head title="easy a11y" property="property" content="description">
+        <meta name="description" />
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>{children}</body>
     </html>
