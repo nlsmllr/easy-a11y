@@ -1,5 +1,6 @@
 import './globals.css';
 
+import type { Metadata } from 'next';
 import localFont from 'next/font/local';
 
 const geistSans = localFont({
@@ -13,12 +14,18 @@ const geistMono = localFont({
   weight: '100 900',
 });
 
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+export const metadata: Metadata = {
+  title: 'easy a11y',
+  description: 'easy a11y',
+};
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
   return (
     <html lang="en">
-      <head title="easy a11y" property="property" content="description">
-        <meta name="description" />
-      </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>{children}</body>
     </html>
   );
