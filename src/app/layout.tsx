@@ -18,7 +18,12 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="en">
       <Head>
-        <meta name="description" content="easy a11y - A simple and accessible solution for web development." />
+        <meta
+          title="easey a11y"
+          property="property"
+          name="description"
+          content="easy a11y - A simple and accessible solution for web development."
+        />
       </Head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>{children}</body>
     </html>
