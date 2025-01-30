@@ -16,7 +16,7 @@ module.exports = {
     'prettier/prettier': 'error',
     'simple-import-sort/imports': 'error',
     'simple-import-sort/exports': 'error',
-    // 'jsx-a11y/rule-name': 2,
+    // 'jsx-a11y/alt-text': 2,
     '@typescript-eslint/ban-ts-comment': [
       'error',
       {
