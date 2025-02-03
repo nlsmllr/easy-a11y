@@ -73,8 +73,7 @@ jobs:
 
             # Determine whether to include detailed audits
             if [ "$ACCESSIBILITY_SCORE" -eq 100 ]; then
-              FAILING_AUDITS="**🎉 You're all set!
-              No accessibility issues found!**"
+              FAILING_AUDITS="**🎉 You're all set! No accessibility issues found!**"
             else
               FAILING_AUDITS=$(echo "$REPORT_CONTENT" | jq -r '
                 .audits 
@@ -101,13 +100,11 @@ jobs:
                 | join("\n\n")
               ')
 
-              # Default message if no issues but not perfect score
               if [ -z "$FAILING_AUDITS" ]; then
                 FAILING_AUDITS="No failing accessibility issues detected."
               fi
             fi
 
-            # Use the ephemeral public URL from the Lighthouse action (temporaryPublicStorage: true)
             if [ -f "$HTML_REPORT_PATH" ]; then
               REPORT_LINK="${{ steps.lighthouse_audit.outputs.uploadUrl }}"
               if [ -z "$REPORT_LINK" ]; then
@@ -127,7 +124,6 @@ jobs:
             REPORT_LINK="#"
           fi
 
-          # Save the output to a GitHub Actions output variable
           echo "formatted_audits<<EOF" >> $GITHUB_ENV
           echo "$FAILING_AUDITS" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
@@ -139,8 +135,9 @@ jobs:
           echo "best_practices_color=$BEST_PRACTICES_COLOR" >> $GITHUB_ENV
           echo "report_link=$REPORT_LINK" >> $GITHUB_ENV
 
-      - name: Add results to PR
+      - name: Add results to PR (Always Runs)
         id: results_to_pr
+        if: always() # ✅ Ensures the comment is posted even if a failure happens
         uses: marocchino/sticky-pull-request-comment@v2.9.0
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -160,3 +157,16 @@ jobs:
 
             [Current deployment](${{ steps.wait_for_deployment.outputs.url }})
             [Lighthouse report](${REPORT_LINK})
+
+      - name: Fail if Accessibility Score is below 75
+        id: check_accessibility
+        run: |
+          if [ "$ACCESSIBILITY_SCORE" -lt 75 ]; then
+            echo "Accessibility score ($ACCESSIBILITY_SCORE) is below the threshold (75). Failing the job."
+            exit 1
+          fi
+
+#  Depend: on für merge-verbot bei fail
+#    Needs: success
+#    BUILD BREAKER
+#  Performance und Best Practice
