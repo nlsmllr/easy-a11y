@@ -134,9 +134,7 @@ jobs:
           message: |
             # Lighthouse Report for this PR
 
-            | Category         | Score |
-            | ---------------- | ----- |
-            | ${{ env.accessibility_color }} Accessibility | ${{ env.accessibility_score }} |
+            | ${{ env.accessibility_color }} Accessibility | Score ${{ env.accessibility_score }} |
 
             # A11y Checks
             ${{ env.formatted_audits }}
