@@ -55,7 +55,6 @@ jobs:
       - name: Extract and format Lighthouse details
         id: format_lighthouse_details
         run: |
-          exit 1
           # Load the detailed JSON report
           REPORT_PATH=$(find .lighthouseci -name "*.report.json" | head -n 1)
           HTML_REPORT_PATH=$(find .lighthouseci -name "*.report.html" | head -n 1)
@@ -147,11 +146,21 @@ jobs:
 
       - name: Fail if Accessibility Score is below 99
         id: check_accessibility
-        continue-on-error: false
         run: |
-          if [ "$ACCESSIBILITY_SCORE" -lt 99 ]; then
-            echo "Accessibility score ($ACCESSIBILITY_SCORE) is below the threshold (75). Failing the job."
+          echo "Current Accessibility Score: $ACCESSIBILITY_SCORE"
+
+          # Ensure the variable is not empty before comparison
+          if [ -z "$ACCESSIBILITY_SCORE" ]; then
+            echo "⚠️ ACCESSIBILITY_SCORE is empty or not set! Defaulting to failing the job."
             exit 1
+          fi
+
+          # Proper integer comparison
+          if [ "$ACCESSIBILITY_SCORE" -lt 99 ]; then
+            echo "❌ Accessibility score ($ACCESSIBILITY_SCORE) is below the threshold (99). Failing the job."
+            exit 1
+          else
+            echo "✅ Accessibility score ($ACCESSIBILITY_SCORE) meets the requirement."
           fi
 
 #  Depend: on für merge-verbot bei fail
