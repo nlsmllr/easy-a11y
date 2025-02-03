@@ -158,10 +158,10 @@ jobs:
             [Current deployment](${{ steps.wait_for_deployment.outputs.url }})
             [Lighthouse report](${REPORT_LINK})
 
-      - name: Fail if Accessibility Score is below 75
+      - name: Fail if Accessibility Score is below 99
         id: check_accessibility
         run: |
-          if [ "$ACCESSIBILITY_SCORE" -lt 75 ]; then
+          if [ "$ACCESSIBILITY_SCORE" -lt 99 ]; then
             echo "Accessibility score ($ACCESSIBILITY_SCORE) is below the threshold (75). Failing the job."
             exit 1
           fi
