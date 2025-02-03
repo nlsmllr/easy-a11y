@@ -147,20 +147,20 @@ jobs:
       - name: Fail if Accessibility Score is below 99
         id: check_accessibility
         run: |
-          echo "Current Accessibility Score: $ACCESSIBILITY_SCORE"
+          echo "Current Accessibility Score:  ${{ env.accessibility_score }}"
 
           # Ensure the variable is not empty and contains only numbers
-          if [ -z "$ACCESSIBILITY_SCORE" ] || ! [[ "$ACCESSIBILITY_SCORE" =~ ^[0-9]+$ ]]; then
+          if [ -z " ${{ env.accessibility_score }}" ] || ! [[ " ${{ env.accessibility_score }}" =~ ^[0-9]+$ ]]; then
             echo "⚠️ ACCESSIBILITY_SCORE is empty or invalid! Defaulting to failing the job."
             exit 1
           fi
 
           # Explicitly allow 99 and 100 to pass
-          if [ "$ACCESSIBILITY_SCORE" -ge 99 ]; then
-            echo "✅ Accessibility score ($ACCESSIBILITY_SCORE) meets the requirement. Continuing."
+          if [ " ${{ env.accessibility_score }}" -ge 99 ]; then
+            echo "✅ Accessibility score ( ${{ env.accessibility_score }}) meets the requirement. Continuing."
             exit 0
           else
-            echo "❌ Accessibility score ($ACCESSIBILITY_SCORE) is below the threshold (99). Failing the job."
+            echo "❌ Accessibility score ( ${{ env.accessibility_score }}) is below the threshold (99). Failing the job."
             exit 1
           fi
 
