@@ -150,12 +150,12 @@ jobs:
           echo "Current Accessibility Score: $ACCESSIBILITY_SCORE"
 
           # Ensure the variable is not empty before comparison
-          if [ -z "$ACCESSIBILITY_SCORE" ]; then
-            echo "⚠️ ACCESSIBILITY_SCORE is empty or not set! Defaulting to failing the job."
+          if [ -z "$ACCESSIBILITY_SCORE" ] || ! [[ "$ACCESSIBILITY_SCORE" =~ ^[0-9]+$ ]]; then
+            echo "⚠️ ACCESSIBILITY_SCORE is empty or not a valid number! Defaulting to failing the job."
             exit 1
           fi
 
-          # Proper integer comparison
+          # Fail only if the score is below 99
           if [ "$ACCESSIBILITY_SCORE" -lt 99 ]; then
             echo "❌ Accessibility score ($ACCESSIBILITY_SCORE) is below the threshold (99). Failing the job."
             exit 1
