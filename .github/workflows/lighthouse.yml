@@ -55,6 +55,7 @@ jobs:
       - name: Extract and format Lighthouse details
         id: format_lighthouse_details
         run: |
+          exit 1
           # Load the detailed JSON report
           REPORT_PATH=$(find .lighthouseci -name "*.report.json" | head -n 1)
           HTML_REPORT_PATH=$(find .lighthouseci -name "*.report.html" | head -n 1)
@@ -134,7 +135,9 @@ jobs:
           message: |
             # Lighthouse Report for this PR
 
-            | ${{ env.accessibility_color }} Accessibility | Score ${{ env.accessibility_score }} |
+            | Category         | Score |
+            | ---------------- | ----- |
+            | ${{ env.accessibility_color }} Accessibility | ${{ env.accessibility_score }} |
 
             # A11y Checks
             ${{ env.formatted_audits }}
