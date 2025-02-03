@@ -146,6 +146,7 @@ jobs:
 
       - name: Fail if Accessibility Score is below 99
         id: check_accessibility
+        continue-on-error: false
         run: |
           if [ "$ACCESSIBILITY_SCORE" -lt 99 ]; then
             echo "Accessibility score ($ACCESSIBILITY_SCORE) is below the threshold (75). Failing the job."
