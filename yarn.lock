@@ -43,6 +43,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@axe-core/react@npm:4.10.1":
+  version: 4.10.1
+  resolution: "@axe-core/react@npm:4.10.1"
+  dependencies:
+    axe-core: "npm:~4.10.2"
+    requestidlecallback: "npm:^0.3.0"
+  checksum: 10c0/626a8b16057e9a932c2aa6edb489e9788e05b0e734d53c3b17da641b96d046daa856d303163f2daa578b9eefa0f0e187e4b224349309037b0264161e7da10122
+  languageName: node
+  linkType: hard
+
 "@babel/code-frame@npm:^7.0.0, @babel/code-frame@npm:^7.10.4, @babel/code-frame@npm:^7.16.7, @babel/code-frame@npm:^7.23.5":
   version: 7.23.5
   resolution: "@babel/code-frame@npm:7.23.5"
@@ -6216,7 +6226,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"axe-core@npm:4.10.2, axe-core@npm:^4.10.0, axe-core@npm:^4.10.2":
+"axe-core@npm:4.10.2, axe-core@npm:^4.10.0, axe-core@npm:^4.10.2, axe-core@npm:~4.10.2":
   version: 4.10.2
   resolution: "axe-core@npm:4.10.2"
   checksum: 10c0/0e20169077de96946a547fce0df39d9aeebe0077f9d3eeff4896518b96fde857f80b98f0d4279274a7178791744dd5a54bb4f322de45b4f561ffa2586ff9a09d
@@ -12948,6 +12958,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "nextjs-template@workspace:."
   dependencies:
+    "@axe-core/react": "npm:4.10.1"
     "@next/bundle-analyzer": "npm:14.2.11"
     "@radix-ui/react-slot": "npm:1.1.0"
     "@storybook/addon-essentials": "npm:8.2.9"
@@ -15061,6 +15072,13 @@ __metadata:
     lodash: "npm:^4.17.21"
     strip-ansi: "npm:^6.0.1"
   checksum: 10c0/24a9fae4cc50e731d059742d1b3eec163dc9e3872b12010d120c3fcbd622765d9cda41f79a1bbb4bf63c1d3442f18a08f6e1642cb5d7ebf092a0ce3f7a3bd143
+  languageName: node
+  linkType: hard
+
+"requestidlecallback@npm:^0.3.0":
+  version: 0.3.0
+  resolution: "requestidlecallback@npm:0.3.0"
+  checksum: 10c0/68a2ff3154788643ccf96436cfaf8ad5bbe2f4d3f4b4d7858ec74681bf7d6a487d17df6a238130ff1e73d0a4a85bdc44b5f945eb79ef7d5552e23fc6288e795f
   languageName: node
   linkType: hard
 
