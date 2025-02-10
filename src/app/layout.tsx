@@ -5,7 +5,7 @@ import './globals.css';
 
 import type { Metadata } from 'next';
 import localFont from 'next/font/local';
-import React from 'react'; // Make sure React is in scope since it's used by axe
+import React from 'react';
 
 const geistSans = localFont({
   src: './fonts/GeistVF.woff',
