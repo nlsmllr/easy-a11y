@@ -13,7 +13,7 @@ this repo includes the following features/tools:
 
 ## Table of Contents
 - [Table of Contents](#table-of-contents)
-- [Rrerequisite](#rrerequisite)
+- [Rerequisite](#rerequisite)
 - [Project structure](#project-structure)
 - [Setup](#setup)
 - [Environment variables](#environment-variables)
@@ -28,7 +28,7 @@ this repo includes the following features/tools:
 - [Google Lighthouse Check](#google-lighthouse-check)
 - [HTML Validator](#html-validator)
 
-## Rrerequisite
+## Rerequisite
 This repository includes various features aimed at the usage of [Vercel](https://vercel.com/) for hosting. To get the best experience from implementing this setup in your project you will need to adjust a few settings within GitHub and Vercel:
 **GitHub:**
 1. [Your repository] > Settings > Branches > Add branch ruleset
