@@ -1,7 +1,11 @@
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-require-imports */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import './globals.css';
 
 import type { Metadata } from 'next';
 import localFont from 'next/font/local';
+import React from 'react'; // Make sure React is in scope since it's used by axe
 
 const geistSans = localFont({
   src: './fonts/GeistVF.woff',
@@ -13,6 +17,12 @@ const geistMono = localFont({
   variable: '--font-geist-mono',
   weight: '100 900',
 });
+
+if (process.env.NODE_ENV !== 'production') {
+  const ReactDOM = require('react-dom');
+  const axe = require('@axe-core/react');
+  axe(React, ReactDOM, 1000);
+}
 
 export const metadata: Metadata = {
   title: 'easy a11y',
