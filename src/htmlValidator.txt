@@ -17,7 +17,7 @@ on:
 jobs:
   generate_html_validator_audit:
     # TODO: change back to 30 min
-    timeout-minutes: 30
+    timeout-minutes: 1
     runs-on: ubuntu-latest
     steps:
       - name: Wait for the Vercel deployment
@@ -25,9 +25,9 @@ jobs:
         id: wait_for_deployment
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          environment: Preview
+          environment: Preview – easy-a11y # Name of the Vercel environment
           # TODO: change back to 1200
-          max_timeout: 1200
+          max_timeout: 10
 
       - name: Add comment to PR
         id: loading_comment_to_pr
@@ -74,7 +74,7 @@ jobs:
           script: |
             const fs = require('fs');
             const results = fs.readFileSync('validation_results.txt', 'utf-8').split('\n\n');
-            const comment = ['# HTML Validation Report for this PR', ' ']
+            const comment = ['⚡️ HTML Validation Report for the changes in this PR:', ' ']
             results.forEach(result => {
               if (result.trim() !== '') {
                 const [url, ...messages] = result.split('\n');
