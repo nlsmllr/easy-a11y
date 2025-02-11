@@ -81,7 +81,7 @@ The project uses ESLint and Prettier to enforce code style. You can run `yarn li
 The project also includes a pre-commit hook that runs the linter via `lint-staged` before committing. This is configured in [.husky/pre-commit](.husky/pre-commit).
 
 ### JSX-A11Y
-JSX-A11Y is part of the ESLint eco systyem and does a static evaluation of the JSX to spot accessibility issues in React apps.
+  JSX-A11Y is an extension of the ESLint eco systyem and does a static evaluation of the JSX to spot accessibility issues in React apps.
 
 ## Testing
 The project uses Vitest for testing. You can run `yarn test` to run the tests or `yarn test:watch` to run the tests in watch mode.  
