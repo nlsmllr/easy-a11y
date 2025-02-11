@@ -5,6 +5,7 @@ module.exports = {
     'plugin:@typescript-eslint/recommended-type-checked',
     'prettier',
     'plugin:jsx-a11y/strict',
+    'plugin:eslint-plugin-jsx-a11y-check/strict-legacy',
   ],
   parser: '@typescript-eslint/parser',
   parserOptions: {
