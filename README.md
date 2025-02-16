@@ -93,9 +93,11 @@ You might need to link your project first using `yarn vercel link`.
 ### Linting
 The project uses ESLint and Prettier to enforce code style. You can run `yarn lint` to check for linting errors and `yarn lint:fix` to fix them. If you use VSCode, fixing automatically happens on save. This is configured in [.vscode/settings.json](.vscode/settings.json).  
 The project also includes a pre-commit hook that runs the linter via `lint-staged` before committing. This is configured in [.husky/pre-commit](.husky/pre-commit).
+If ESLint detects any errors, you are prohibited from commiting any changes until these errors are fixed or disabled.
 
 #### JSX-A11Y
-  JSX-A11Y is an extension of the ESLint eco systyem and does a static evaluation of the JSX to spot accessibility issues in React apps.
+JSX-A11Y is an extension of the ESLint eco systyem and does a static evaluation of the JSX to spot accessibility issues in React apps.
+The classification of a violation is defined by a warning or an error or no violation. To adjust the severity of the violations, please consult the [JSX-A11Y-Documentation](https://www.npmjs.com/package/eslint-plugin-jsx-a11y).
 
 ### Testing
 The project uses Vitest for testing. You can run `yarn test` to run the tests or `yarn test:watch` to run the tests in watch mode.  
