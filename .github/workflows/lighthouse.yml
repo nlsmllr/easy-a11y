@@ -8,7 +8,7 @@ permissions:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: true # for further
 
 on:
   pull_request:
@@ -17,7 +17,7 @@ on:
 jobs:
   generate_lighthouse_audit:
     timeout-minutes: 30
-    runs-on: ubuntu-latest-4cores-16gb
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -48,92 +48,104 @@ jobs:
         with:
           urls: |
             ${{ steps.wait_for_deployment.outputs.url }}
-          runs: 3
+          runs: 3 # running 3 times for consistency
           uploadArtifacts: true
           temporaryPublicStorage: true
 
-      - name: Format Lighthouse score and generate detailed report
-        id: format_lighthouse_score
-        continue-on-error: true
-        uses: actions/github-script@v7.0.1
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          result-encoding: string
-          script: |
-            // The Lighthouse action outputs two JSON values:
-            // - manifest: an array of audit results
-            // - links: an object mapping audited URLs to detailed report URLs
-            const results = ${{ steps.lighthouse_audit.outputs.manifest }};
-            const links = ${{ steps.lighthouse_audit.outputs.links }};
-            const representativeResults = results.filter(result => result.isRepresentativeRun);
+      - name: Extract and format Lighthouse details
+        id: format_lighthouse_details
+        run: |
+          # Load the detailed JSON report
+          REPORT_PATH=$(find .lighthouseci -name "*.report.json" | head -n 1)
+          HTML_REPORT_PATH=$(find .lighthouseci -name "*.report.html" | head -n 1)
+          if [ -f "$REPORT_PATH" ]; then
+            REPORT_CONTENT=$(cat "$REPORT_PATH")
 
-            const commentLines = ['⚡️ Lighthouse Report for the changes in this PR:', ' '];
+            # Extract scores
+            ACCESSIBILITY_SCORE=$(echo "$REPORT_CONTENT" | jq -r '.categories.accessibility.score * 100 | floor')
 
-            if (representativeResults.length > 0) {
-              representativeResults.forEach((rep, i) => {
-                const result = rep.summary;
-                // Convert scores to percentages
-                for (const key in result) {
-                  result[key] = Math.round(result[key] * 100);
-                }
-                // Choose an emoji based on the score
-                const scoreEmoji = res => res >= 90 ? '🟢' : res >= 50 ? '🟠' : '🔴';
-                
-                commentLines.push(
-                  '---',
-                  `Results for [${Object.keys(links)[i]}](${Object.keys(links)[i]}):`,
-                  '| Category | Score |',
-                  '| --- | --- |',
-                  `| ${scoreEmoji(result.performance)} Performance | ${result.performance} |`,
-                  `| ${scoreEmoji(result.accessibility)} Accessibility | ${result.accessibility} |`,
-                  `| ${scoreEmoji(result['best-practices'])} Best practices | ${result['best-practices']} |`,
-                  `| ${scoreEmoji(result.seo)} SEO | ${result.seo} |`,
-                  ' ',
-                  `*Detailed Report: [Lighthouse report](${Object.values(links)[i]})*`,
-                  ' '
-                );
-                // Use the accessibility score from the first result for threshold checking
-                if (i === 0) {
-                  core.setOutput("accessibility_score", result.accessibility);
-                }
-              });
-            } else {
-              commentLines.push("No representative Lighthouse results found.");
-              core.setOutput("accessibility_score", 0);
-            }
+            # Assign colors based on score thresholds
+            ACCESSIBILITY_COLOR=$(if [ $ACCESSIBILITY_SCORE -ge 90 ]; then echo "🟢"; elif [ $ACCESSIBILITY_SCORE -ge 50 ]; then echo "🟠"; else echo "🔴"; fi)
 
-            const output = commentLines.join('\n');
-            core.setOutput("result", output);
-            return output;
+            # Determine whether to include detailed audits
+            if [ "$ACCESSIBILITY_SCORE" -eq 100 ]; then
+              FAILING_AUDITS="**🎉 You're all set! No accessibility issues found!**"
+            else
+              FAILING_AUDITS=$(echo "$REPORT_CONTENT" | jq -r '
+                .audits 
+                | to_entries 
+                | map(
+                    select(
+                      .value.score != 1 and 
+                      .value.details and 
+                      .value.details.items
+                    ) 
+                    | select(
+                        .value.details.items 
+                        | map(.node.snippet // "No element data") 
+                        | map(select(. != "No element data")) 
+                        | length > 0
+                      )
+                    | (
+                        "**" + .value.title + "**: \n" + 
+                        .value.description + "\n\n" + 
+                        "❗️ Might need your attention:\n" + 
+                        (.value.details.items | map("`" + (.node.snippet // "") + "`") | join("\n\n")) + "\n\n"
+                      )
+                  ) 
+                | join("\n\n")
+              ')
 
-      - name: Report error to PR
-        id: report_error_to_pr
-        if: ${{ steps.format_lighthouse_score.outcome != 'success' }}
-        uses: marocchino/sticky-pull-request-comment@v2.9.0
-        with:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          number: ${{ github.event.pull_request.number }}
-          header: lighthouse
-          message: |
-            Error while running Lighthouse audit:
-            ${{ steps.format_lighthouse_score.outputs.result }}
+              if [ -z "$FAILING_AUDITS" ]; then
+                FAILING_AUDITS="No failing accessibility issues detected."
+              fi
+            fi
 
-      - name: Add results to PR
+            # Use the detailed report link from the Lighthouse action's links output
+            REPORT_LINK=$(echo "${{ steps.lighthouse_audit.outputs.links }}" | jq -r 'to_entries | .[0].value')
+            if [ -z "$REPORT_LINK" ] || [ "$REPORT_LINK" = "null" ]; then
+              REPORT_LINK="#"
+            fi
+          else
+            FAILING_AUDITS="Lighthouse report not found."
+            ACCESSIBILITY_SCORE="N/A"
+            ACCESSIBILITY_COLOR="🔴"
+            REPORT_LINK="#"
+          fi
+
+          echo "formatted_audits<<EOF" >> $GITHUB_ENV
+          echo "$FAILING_AUDITS" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+          echo "accessibility_score=$ACCESSIBILITY_SCORE" >> $GITHUB_ENV
+          echo "accessibility_color=$ACCESSIBILITY_COLOR" >> $GITHUB_ENV
+          echo "report_link=$REPORT_LINK" >> $GITHUB_ENV
+
+      - name: Add results to PR (Always Runs)
         id: results_to_pr
-        if: ${{ steps.format_lighthouse_score.outcome == 'success' }}
+        if: always() # ✅ Ensures the comment is posted even if a failure happens
         uses: marocchino/sticky-pull-request-comment@v2.9.0
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           number: ${{ github.event.pull_request.number }}
           header: lighthouse
           message: |
-            ${{ steps.format_lighthouse_score.outputs.result }}
+            # Lighthouse Report for this PR
+
+            | Category         | Score |
+            | ---------------- | ----- |
+            | ${{ env.accessibility_color }} Accessibility | ${{ env.accessibility_score }} |
+
+            # A11y Checks
+            ${{ env.formatted_audits }}
+
+            [Current deployment](${{ steps.wait_for_deployment.outputs.url }})
+            [Lighthouse report](${REPORT_LINK})
 
       - name: Fail if Accessibility Score is below 90
         id: check_accessibility
         run: |
-          echo "Current Accessibility Score: ${{ steps.format_lighthouse_score.outputs.accessibility_score }}"
-          if [ "${{ steps.format_lighthouse_score.outputs.accessibility_score }}" -lt 90 ]; then
-            echo "Accessibility score (${{ steps.format_lighthouse_score.outputs.accessibility_score }}) is below the threshold (90). Failing the job."
+          echo "Current Accessibility Score: ${{ env.accessibility_score }}"
+          if [ "${{ env.accessibility_score }}" -lt 90 ]; then
+            echo "Accessibility score ($ACCESSIBILITY_SCORE) is below the threshold (90). Failing the job."
             exit 1
           fi
