@@ -142,7 +142,7 @@ jobs:
             ${{ env.formatted_audits }}
 
             [Current deployment](${{ steps.wait_for_deployment.outputs.url }})
-            [Lighthouse report](${REPORT_LINK})
+            [Lighthouse report](${{ env.report_link }})
 
       - name: Fail if Accessibility Score is below 90
         id: check_accessibility
