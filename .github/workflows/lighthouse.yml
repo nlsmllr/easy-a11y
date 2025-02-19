@@ -125,7 +125,7 @@ jobs:
 
       - name: Add results to PR (Always Runs)
         id: results_to_pr
-        if: always() # ✅ Ensures the comment is posted even if a failure happens
+        if: always() # Ensures the comment is posted even if a failure happens
         uses: marocchino/sticky-pull-request-comment@v2.9.0
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
