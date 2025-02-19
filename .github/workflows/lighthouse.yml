@@ -102,8 +102,9 @@ jobs:
             fi
 
             if [ -f "$HTML_REPORT_PATH" ]; then
-              REPORT_LINK="${{ steps.lighthouse_audit.outputs.uploadUrl }}"
-              if [ -z "$REPORT_LINK" ]; then
+              # Extract the first report URL from the links JSON output
+              REPORT_LINK=$(echo '${{ steps.lighthouse_audit.outputs.links }}' | jq -r 'to_entries | .[0].value')
+              if [ -z "$REPORT_LINK" ] || [ "$REPORT_LINK" = "null" ]; then
                 REPORT_LINK="#"
               fi
             else
@@ -122,10 +123,11 @@ jobs:
           echo "accessibility_score=$ACCESSIBILITY_SCORE" >> $GITHUB_ENV
           echo "accessibility_color=$ACCESSIBILITY_COLOR" >> $GITHUB_ENV
           echo "report_link=$REPORT_LINK" >> $GITHUB_ENV
+        shell: bash
 
       - name: Add results to PR (Always Runs)
         id: results_to_pr
-        if: always() # ✅ Ensures the comment is posted even if a failure happens
+        if: always() # Ensures the comment is posted even if a failure happens
         uses: marocchino/sticky-pull-request-comment@v2.9.0
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -142,7 +144,7 @@ jobs:
             ${{ env.formatted_audits }}
 
             [Current deployment](${{ steps.wait_for_deployment.outputs.url }})
-            [Full Lighthouse report](${REPORT_LINK})
+            [Full Lighthouse report](${{ env.report_link }})
 
       - name: Fail if Accessibility Score is below 90
         id: check_accessibility
