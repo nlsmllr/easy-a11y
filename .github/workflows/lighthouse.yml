@@ -101,9 +101,12 @@ jobs:
               fi
             fi
 
-            # Use the detailed report link from the Lighthouse action's links output
-            REPORT_LINK=$(echo "${{ steps.lighthouse_audit.outputs.links }}" | jq -r 'to_entries | .[0].value')
-            if [ -z "$REPORT_LINK" ] || [ "$REPORT_LINK" = "null" ]; then
+            if [ -f "$HTML_REPORT_PATH" ]; then
+              REPORT_LINK="${{ steps.lighthouse_audit.outputs.uploadUrl }}"
+              if [ -z "$REPORT_LINK" ]; then
+                REPORT_LINK="#"
+              fi
+            else
               REPORT_LINK="#"
             fi
           else
@@ -139,7 +142,7 @@ jobs:
             ${{ env.formatted_audits }}
 
             [Current deployment](${{ steps.wait_for_deployment.outputs.url }})
-            [Lighthouse report](${REPORT_LINK})
+            [Lighthouse report](${{ env.report_link }})
 
       - name: Fail if Accessibility Score is below 90
         id: check_accessibility
