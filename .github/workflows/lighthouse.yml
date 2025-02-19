@@ -106,9 +106,6 @@ jobs:
               if [ -z "$REPORT_LINK" ]; then
                 REPORT_LINK="#"
               fi
-            else
-              REPORT_LINK="#"
-            fi
           else
             FAILING_AUDITS="Lighthouse report not found."
             ACCESSIBILITY_SCORE="N/A"
@@ -142,7 +139,7 @@ jobs:
             ${{ env.formatted_audits }}
 
             [Current deployment](${{ steps.wait_for_deployment.outputs.url }})
-            [Lighthouse report](${{ env.report_link }})
+            [Full Lighthouse report](${REPORT_LINK})
 
       - name: Fail if Accessibility Score is below 90
         id: check_accessibility
