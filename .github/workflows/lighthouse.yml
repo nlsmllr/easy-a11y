@@ -106,6 +106,9 @@ jobs:
               if [ -z "$REPORT_LINK" ]; then
                 REPORT_LINK="#"
               fi
+            else
+              REPORT_LINK="#"
+            fi
           else
             FAILING_AUDITS="Lighthouse report not found."
             ACCESSIBILITY_SCORE="N/A"
